@@ -8,6 +8,7 @@ Then drag the /toukie/Script/ folder into your KSP install's /Ships/ folder and 
 When IN ORBIT type the following to start the program, press the ENTER key to finish the sentence:
 
 copypath("0:/boot/bootup_toukie", "").
+
 runpath(bootup_toukie).
 
 
