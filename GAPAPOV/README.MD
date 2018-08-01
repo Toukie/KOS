@@ -2,6 +2,7 @@ Demonstration:
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
 
 To run GAPAPOV you will first need to install KOS:
+https://ksp-kos.github.io/KOS/downloads_links.html#obtain
 
 Then drag the /toukie/Script/ folder into your KSP install's /Ships/ folder and merge the folders if needed.
 
