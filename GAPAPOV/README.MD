@@ -1,5 +1,4 @@
-Demonstration:
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](http://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE)
+[![Demonstration](http://img.youtube.com/vi/bi_9wna6vWY/0.jpg)](http://www.youtube.com/watch?v=bi_9wna6vWY)
 
 To run GAPAPOV you will first need to install KOS:
 https://ksp-kos.github.io/KOS/downloads_links.html#obtain
