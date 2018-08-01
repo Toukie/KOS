@@ -6,6 +6,7 @@ https://ksp-kos.github.io/KOS/downloads_links.html#obtain
 
 Then drag the /toukie/Script/ folder into your KSP install's /Ships/ folder and merge the folders if needed.
 
+To open the KOS terminal right click the KOS processor and activate it.
 When IN ORBIT type the following to start the program, press the ENTER key to finish the sentence:
 
 copypath("0:/boot/bootup_toukie", "").
