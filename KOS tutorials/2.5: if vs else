@@ -1,6 +1,7 @@
 Hopefully you now know the basics of how if works. You might be wondering why use 'else if' if it's the same as if.
 
 using else if:
+
 set x to 1.
 
 if x = 1 {
