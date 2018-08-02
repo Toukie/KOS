@@ -4,12 +4,22 @@ For instance 'if', this checks if a certain value matches the given value.
 set x to 1.
 
 if x = 1 {
-  print "x is 1".
+  print "x is one".
 }
 
 You've probably noticed the curly brackets {}, after an if statement you don't need a
 period but you need these brackets. You could cover the piece the code within the
-curly brackets and say: if 'x' is equal to 1, then do whatever I covered with my hand.
+curly brackets with your hand and say: if 'x' is equal to 1, then do whatever I covered with my hand.
+If statements can also be used for booleans:
+
+set SomeVariable to true.
+
+if SomeVariable = true {
+  print "this is true".
+} else {
+  print "this is false".
+}
+
 
 Ofcourse the equals sign isn't the only symbol you can use, other symbols are:
 
@@ -21,7 +31,7 @@ equals to or smaller than
 1 <= 1
 1 <= 2
 
-not equal to
+is not equal to
 1 <> 2
 
 Back to the 'if' statement, say you're not sure if an 'if' statement will be true, you
@@ -52,12 +62,3 @@ if x = 2 {
 
 This would print "x is one".
 
-If statements can also be used for booleans:
-
-set SomeVariable to true.
-
-if SomeVariable = true {
-  print "this is true".
-} else {
-  print "this is false".
-}
