@@ -62,11 +62,11 @@ Function ShiftGear {
   Press in the gas pedal.
 }
 
-On paper this sounds like a great idea but if your instructor tells you ShiftGear() first, second. You're not sure to fill which
-blank space with first and which blank space with second. Wouldn't it be handy if you made rule that the first word your instructor
-says is the gear you start in and the second word is the gear you end in? Well luckily there's a way to apply that rule.
+On paper this sounds like a great idea but if your instructor tells you ShiftGear() first, second. But you're not sure where to
+put 'first' and where to put 'second'. Wouldn't it be handy if you made rule that the first word your instructor says is the
+gear you start in and the second word he says is the gear you end in? Well luckily there's a way to apply that rule.
 This is were parameters come into play, all functions get called using () after the function name and inside of the brackets
-you put the start values.
+you put the parameters.
 
 Function ShiftGear {
   Parameter StartGear.
@@ -108,3 +108,20 @@ This will show:
 4
 5
 _______________________________________________________________________________________________________________________________
+Here's an example of a simple function which has parameters and will also work in KOS:
+
+Function AddFive {
+  Parameter StartNumber.
+  
+  print StartNumber + 5.
+}
+
+If you type:
+
+AddFive(20).
+
+It will show: 25
+
+Now what if you want to use the value with five added to it for future use, is that possible? Yes ofcourse that's possible!
+The return command is very helpful is these situations. The return function returns a value, piece of text, boolean etc and ends
+the function it is in.
