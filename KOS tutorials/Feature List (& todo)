@@ -1,36 +1,14 @@
-General Features
-
-    Case Insensitivity
-    Expressions
-    Short-circuiting booleans
-    Late Typing
-    Lazy Globals (variable declarations optional)
-    User Functions
-    Structures
-    Triggers
-
-Language Syntax
-
-    General Rules
-    Numbers (scalars)
-    Braces (statement blocks)
-    Functions (built-in)
-    Suffixes as Functions (Methods)
-    User Functions
-    Built-In Special Variable Names
-    What does not exist (yet?)
-
 Flow Control
 
     BREAK
-    IF / ELSE
-    LOCK
+    IF / ELSE       DONE
+    LOCK            DONE
     UNLOCK
-    UNTIL loop
+    UNTIL loop      DONE
     FOR loop
     FROM loop
-    WAIT
-    Boolean Operators
+    WAIT            DONE
+    Boolean         DONE
     DECLARE FUNCTION
     RETURN
     WHEN / THEN statements, and ON statements
@@ -40,9 +18,9 @@ Variables
 
     DECLARE .. TO/IS
     DECLARE PARAMETER
-    SET
+    SET                 DONE
     DEFINED
-    LOCK
+    LOCK                DONE
     TOGGLE
     ON
     OFF
