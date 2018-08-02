@@ -1,0 +1,99 @@
+Hopefully you now know the basics of how if works. You might be wondering why use 'else if' if it's the same as if.
+
+using else if:
+set x to 1.
+
+if x = 1 {
+  print "x is one".
+} else if x = 2 {
+  print "x is two".
+} else {
+  print "x isn't one or two".
+}
+________________________________________________________________________________________________________________________________
+just using if:
+
+set x to 1.
+
+if x = 1 {
+  print "x is one".
+}
+
+if x = 2 {
+  print "x is two".
+}
+
+Now you run into the problem of 'what if x isn't one or two', you could solve this problem by using a variable that changes when it
+goes through an if loop.
+
+set x to 1.
+set OneOrTwo to false.
+
+if x = 1 {
+  print "x is one".
+  set OneOrTwo to true.
+}
+
+if x = 2 {
+  print "x is two".
+  set OneOrTwo to true.
+}
+
+if OneOrTwo = false {
+  print "x isn't one or two".
+}
+
+Now this essentialy does the same as the else if script but let's say you want to change the value of x after an if loop.
+________________________________________________________________________________________________________________________________
+
+set x to 1.
+set OneOrTwo to false.
+
+if x = 1 {
+  print "x is one".
+  set OneOrTwo to true.
+  set x to 2.
+}
+
+if x = 2 {
+  print "x is two".
+  set OneOrTwo to true.
+  set x to 3.
+}
+
+if OneOrTwo = false {
+  print "x isn't one or two".
+}
+
+Now this is where the trouble starts! This will show: 
+x is one
+x is two
+As you can see it prints two things and fails to print:
+x isn't one or two
+
+In certain situations you don't want the script to perform another piece of code once you've changed a value. And besides,
+this piece of code is very messy. This is where our else if piece of code comes back into play:
+
+set x to 1.
+
+if x = 1 {
+  print "x is one".
+  set x to 2.
+} else if x = 2 {
+  print "x is two".
+  set x to 3.
+} else {
+  print "x isn't one or two".
+}
+
+This will only show: 
+x is one
+
+As you can see it ignores all other `else if` and `else` statements once it has completed its if loop.
+
+
+
+
+
+
+
