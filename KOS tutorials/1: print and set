@@ -39,12 +39,14 @@ set command, numbers and booleans (true of false) don't need "".
 
 set x to "hello world".
 set y to true.
-set z to 456.
+set z to 123.
 
 print x.   // shows: hello world
 print "x". // shows: x
 print y.   // shows: true
-print z.   // shows: 456
+print "y". // shows: y
+print z.   // shows: 123
+print "z". // shows: z
 
 You can also replace a variable you've made:
 
