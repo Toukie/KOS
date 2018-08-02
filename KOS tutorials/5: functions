@@ -120,8 +120,22 @@ If you type:
 
 AddFive(20).
 
-It will show: 25
+Shows: 25
 
 Now what if you want to use the value with five added to it for future use, is that possible? Yes ofcourse that's possible!
 The return command is very helpful is these situations. The return function returns a value, piece of text, boolean etc and ends
 the function it is in.
+
+Function AddFive {
+  Parameter StartNumber.
+  
+  return StartNumber + 5.
+  print "you cant see this".
+}
+
+And type:
+
+set SomeValue to AddFive(20).
+print SomeValue.
+
+Shows: 25
