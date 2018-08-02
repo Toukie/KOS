@@ -1,1 +1,65 @@
-to be made...
+Imagine you're driving in a manual shift car for with an instructor for the first time.
+He helps you getting into first gear and tells you the following when you want to accelerate:
+
+Let go of the gas pedal
+Press in the clutch pedal
+Shift the gear stick from first to second
+Let go of the clutch pedal
+Press in the gas pedal
+
+After a while he tells you:
+
+Let go of the gas pedal
+Press in the clutch pedal
+Shift the gear stick from second to third
+Let go of the clutch pedal
+Press in the gas pedal
+
+Not long after that he tells you:
+
+Let go of the gas pedal
+Press in the clutch pedal
+Shift the gear stick from third to fourth
+Let go of the clutch pedal
+Press in the gas pedal
+
+Wouldn't it be easier if instead of telling you the entire procedure he'd tell you the following:
+
+Shift from first to second
+
+And after a after he tells you:
+
+Shift from second to third
+
+And not long after that he tells you:
+
+Shift from third to fourth
+
+As you can see you only need to know how to shift once (if you're a quick learner) and after that telling the whole process is
+repetitive. The same goes for code in KOS, you might want to use a piece of code more than once without typing it out everytime.
+This is called a function and functions often have parameters (similar to starting conditions).
+
+Here's an example of a simple function:
+
+Function OneThroughFivePrint {
+  print 1.
+  print 2.
+  print 3.
+  print 4.
+  print 5.
+}
+
+Functions can have any name but avoid making functions and variables the same name as this will very likely cause problems.
+A function will do anything that's inside of the curly brackets. To use a function type the following:
+
+OneThroughFivePrint().
+
+This will show:
+1
+2
+3
+4
+5
+
+
+
