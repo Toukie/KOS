@@ -1,1 +1,19 @@
-to be made...
+In KOS you can access information about orbits using special structures.
+Let's start with things we can check about our ship's orbit.
+
+print ship:orbit:apoapsis. // shows the ship's apoapsis
+print kerbin:orbit:apoapsis // shows kerbin's apoapsis
+
+You could compare these structures to a fill in the blanks story:
+
+print ___:orbit:apoapsis. // shows the apoapsis of whatever you fill in the blank
+
+There are also other things you can get instead of just apoapsis, for example:
+print ship:orbit:periapsis. // shows the ship's periapsis
+print ship:orbit:period. // shows the ship's period
+print ship:orbit:inclination. // shows the ship's inclination
+print ship:orbit:eccentricity. // shows the ship's eccentricity
+print ship:orbit:semimajoraxis. // shows the ship's semimajoraxis
+
+The full list of things you can add after :orbit can be found here:
+https://ksp-kos.github.io/KOS/structures/orbits/orbit.html
