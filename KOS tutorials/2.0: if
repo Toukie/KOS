@@ -7,6 +7,8 @@ if x = 1 {
   print "x is one".
 }
 
+This will show: x is one
+
 You've probably noticed the curly brackets {}, after an if statement you don't need a period but you need these brackets.
 You could cover the piece the code within the curly brackets with your hand and say: if 'x' is equal to 1, then do whatever
 I covered with my hand. If statements can also be used for booleans:
@@ -19,6 +21,7 @@ if SomeVariable = true {
   print "this is false".
 }
 
+This will show: this is true
 
 Ofcourse the equals sign isn't the only symbol you can use, other symbols are:
 
