@@ -110,32 +110,41 @@ This will show:
 _______________________________________________________________________________________________________________________________
 Here's an example of a simple function which has a parameter and will also work in KOS:
 
-Function AddFive {
-  Parameter StartNumber.
+Let's say we're in a perfectly circular orbit around kerbin, we can use the following formula:
+velocity = (2 * pi * radius) / orbital period
+(https://en.wikipedia.org/wiki/Circular_motion#Formulas)
+
+Ignore how ship:orbit:period works for now, that will be discussed in the next tutorial.
+
+Function VelocityCalculator {
+  Parameter OrbitHeight.
   
-  print StartNumber + 5.
+  set KerbinRadius to 600000.
+  set TotalRadius to OrbitHeight + KerbinRadius.
+  set OrbitalPeriod to ship:orbit:period.
+  print (2 * 3.1416 * TotalRadius) / OrbitalPeriod.
 }
 
-If you type:
+If you're in a 400 km circular orbit and type:
 
-AddFive(20).
+VelocityCalculator(400000).
+Will show your orbital velocity.
 
-Shows: 25
-
-Now what if you want to use the value with five added to it for future use, is that possible? Yes ofcourse that's possible!
+Now what if you want to use the velocity for other calculations, is that possible? Yes ofcourse that's possible!
 The return command is very helpful is these situations. The return function returns a value, piece of text, boolean etc and ends
 the function it is in.
 
-Function AddFive {
-  Parameter StartNumber.
+Function VelocityCalculator {
+  Parameter OrbitHeight.
   
-  return StartNumber + 5.
-  print "you cant see this".
+  set KerbinRadius to 600000.
+  set TotalRadius to OrbitHeight + KerbinRadius.
+  set OrbitalPeriod to ship:orbit:period.
+  return (2 * 3.1416 * TotalRadius) / OrbitalPeriod.
+  print "this will be skipped".
 }
 
-And type:
+set CurrentVelocity to VelocityCalculator(400000).
+print CurrentVelocity.
 
-set SomeValue to AddFive(20).
-print SomeValue*2.
-
-Shows: 50
+Will show your orbital velocity.
