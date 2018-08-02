@@ -65,3 +65,5 @@ conditions have been met.
 set TimePlusFive to time:seconds + 5.
 wait until time:seconds > TimePlusFive.
 print "done waiting".
+
+It will take 5 seconds for done waiting to show up.
