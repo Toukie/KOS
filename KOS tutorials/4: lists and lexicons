@@ -64,3 +64,5 @@ set MyLexicon to lexicon(
 print MyLexicon["MyValue1"]. // shows 100
 print MyLexicon["MyValue2"]. // shows 200
 print MyLexicon["MyValue3"]. // shows 300
+
+NOTE: print MyLexicon[100]. will NOT work.
