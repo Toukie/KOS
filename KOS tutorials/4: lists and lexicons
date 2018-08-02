@@ -31,6 +31,36 @@ print ValueList[4]. // shows 20
 
 But the problem with this is that you have to know how big the list is and it'd take up a lot space when dealing with big lists.
 
+for Whatever in ValueList {
+  print Whatever.
+}
+
 for Value in ValueList {
   print Value.
 }
+
+Both pieces of code do EXACTLY the same.
+This checks each item in a given list (now called Whatever) and does what the curly brackets contains. 
+In this case it prints:
+0
+5
+10
+15
+20
+
+Lexicons are in a way the same as lists but they have some crucial differences.
+Lexicons can store a pair of information, for example:
+
+set MyLexicon to lexicon("MyValue1", 100, "MyValue2", 200, "MyValue3", 300).
+
+The following piece of code acts EXACTLY the same as the piece of code above but is easier to read:
+
+set MyLexicon to lexicon(
+  "MyValue1", 100,
+  "MyValue2", 200,
+  "MyValue3", 300
+).
+
+print MyLexicon["MyValue1"]. // shows 100
+print MyLexicon["MyValue2"]. // shows 200
+print MyLexicon["MyValue3"]. // shows 300
