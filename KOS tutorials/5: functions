@@ -108,7 +108,7 @@ This will show:
 4
 5
 _______________________________________________________________________________________________________________________________
-Here's an example of a simple function which has parameters and will also work in KOS:
+Here's an example of a simple function which has a parameter and will also work in KOS:
 
 Function AddFive {
   Parameter StartNumber.
@@ -136,6 +136,6 @@ Function AddFive {
 And type:
 
 set SomeValue to AddFive(20).
-print SomeValue.
+print SomeValue*2.
 
-Shows: 25
+Shows: 50
