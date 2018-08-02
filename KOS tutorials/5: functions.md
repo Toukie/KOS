@@ -108,7 +108,7 @@ This will show:
 4
 5
 _______________________________________________________________________________________________________________________________
-Here's an example of a simple function which has a parameter and will also work in KOS:
+Here's an example of a more complex function which has a parameter and will also work in KOS:
 
 Let's say we're in a perfectly circular orbit around kerbin, we can use the following formula:
 velocity = (2 * pi * radius) / orbital period
