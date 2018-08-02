@@ -2,7 +2,8 @@ In KOS you can access information about orbits using special structures.
 Let's start with things we can check about our ship's orbit.
 
 print ship:orbit:apoapsis. // shows the ship's apoapsis
-print kerbin:orbit:apoapsis // shows kerbin's apoapsis
+print kerbin:orbit:apoapsis. // shows kerbin's apoapsis
+print ship:body:orbit:apoapsis. // shows kerbin's apoapsis if you're currently orbiting kerbin 
 
 You could compare these structures to a fill in the blanks story:
 
@@ -17,3 +18,12 @@ print ship:orbit:semimajoraxis. // shows the ship's semimajoraxis
 
 The full list of things you can add after :orbit can be found here:
 https://ksp-kos.github.io/KOS/structures/orbits/orbit.html
+
+__________________________________________________________________________________________________________________________________
+
+Taking a step back, you can also look up values of planets
+
+print kerbin:name. // shows kerbin
+print kerbin:mass. // shows kerbin's mass
+print kerbin:radius // shows kerbin's radius
+print kerbin:mu // shows kerbin's gravitational parameter
