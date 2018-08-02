@@ -7,10 +7,9 @@ if x = 1 {
   print "x is one".
 }
 
-You've probably noticed the curly brackets {}, after an if statement you don't need a
-period but you need these brackets. You could cover the piece the code within the
-curly brackets with your hand and say: if 'x' is equal to 1, then do whatever I covered with my hand.
-If statements can also be used for booleans:
+You've probably noticed the curly brackets {}, after an if statement you don't need a period but you need these brackets.
+You could cover the piece the code within the curly brackets with your hand and say: if 'x' is equal to 1, then do whatever
+I covered with my hand. If statements can also be used for booleans:
 
 set SomeVariable to true.
 
@@ -34,8 +33,8 @@ equals to or smaller than
 is not equal to
 1 <> 2
 
-Back to the 'if' statement, say you're not sure if an 'if' statement will be true, you
-can use the 'else' statement. the 'else' statement also requires curly brackets {}.
+Back to the 'if' statement, say you're not sure if an 'if' statement will be true, you can use the 'else' statement.
+The 'else' statement also requires curly brackets {}.
 
 set x to 1.
 
@@ -45,10 +44,9 @@ if x = 2 {
   print "x isn't two".
 }
 
-Since x isn't 2, it skips whatever would happen if 'x' would be 2. And checks what else
-to do, which is to print "x isn't two".
-You could expand this by using 'else if', which means that if the first 'if' statement
-isn't true then check the following 'if' statement.
+Since x isn't 2, it skips whatever would happen if 'x' would be 2. And checks what else to do, which is to print "x isn't two".
+You could expand this by using 'else if', which means that if the first 'if' statement isn't true then check the following 'if'
+statement.
 
 set x to 1.
 
