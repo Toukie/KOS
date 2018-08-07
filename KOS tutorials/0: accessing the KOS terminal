@@ -1,6 +1,7 @@
 To use KOS you need to have a KOS processor on your vessel, they can be found under the 'control' tab in the editor and are under 
 the same tab as the RCS thrusters and the reaction wheels.
-Right clicking the KOS processor in the editor shows a screen where you can tweak settings of the KOS processor.
+Right clicking the KOS processor in the editor after adding it to your vessel shows a screen where you can tweak settings of the
+KOS processor.
 
 There are two ways you can create KOS scripts: either you make them in game and edit them in game or you use a text editor.
 ___________________________________________________________________________________________________________________________________
