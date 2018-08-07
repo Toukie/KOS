@@ -9,16 +9,14 @@ if x = 1 {
 
 This will show: x is one
 
-You've probably noticed the curly brackets {}, after an if statement you don't need a period but you need these brackets.
+You've probably noticed the curly brackets {} after an if statement. You don't need a period but you need these brackets.
 You could cover the piece the code within the curly brackets with your hand and say: if 'x' is equal to 1, then do whatever
 I covered with my hand. If statements can also be used for booleans:
 
-set SomeVariable to true.
+set SomeBoolean to true.
 
-if SomeVariable = true {
-  print "this is true".
-} else {
-  print "this is false".
+if SomeBoolean {
+  print "this is a true".
 }
 
 This will show: this is true
@@ -36,30 +34,31 @@ equals to or smaller than
 is not equal to
 1 <> 2
 
-Back to the 'if' statement, say you're not sure if an 'if' statement will be true, you can use the 'else' statement.
-The 'else' statement also requires curly brackets {}.
+So as you have seen, we created some commands that will only happen if a condition is true, otherwise nothing happens and we move
+on. But what if you want to do some commands when the condition is true and instead of doing nothing when it's false, 
+you'd give it commands to do instead. The 'else' statement also requires curly brackets {}.
 
-set x to 1.
+set SomeAnimal to "Dog".
 
-if x = 2 {
-  print "x is two".
+if SomeAnimal = "Cat" {
+  print "this is a cat".
 } else {
-  print "x isn't two".
+  print "this is not a cat".
 }
 
-Since x isn't 2, it skips whatever would happen if 'x' would be 2. And checks what else to do, which is to print "x isn't two".
-You could expand this by using 'else if', which means that if the first 'if' statement isn't true then check the following 'if'
-statement.
+Since SomeAnimal isn't Cat, it skips whatever would happen if SomeAnimal would be Cat. Then it checks what else to do, which is
+to print "this is not a cat". You could expand this by using 'else if', which means that if the first 'if' statement isn't true
+then check the following 'if' statement.
 
-set x to 1.
 
-if x = 2 {
-  print "x is two".
-} else if x = 1 {
-  print "x is one".
+set SomeAnimal to "Dog".
+
+if SomeAnimal = "Cat" {
+  print "this is a cat".
+} else if SomeAnimal = "Dog" {
+  print "this is a dog".
 } else {
-  print "x isn't one or two".
-}
+  print "this is neither a cat nor a dog".
 
-This would print "x is one".
+This would print "this is a dog".
 
