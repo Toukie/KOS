@@ -12,9 +12,11 @@ about what it says. Here's an example of what happens if you make something a co
 // print "hello world 1".
 print "hello world 2".
 
-If you'd run these two lines of code you'd only see:
+If you'd run these two lines of code you'd ONLY see:
 hello world 2
-This is because the first line was commented out.
+
+You'd might be wondering why you'd want to use the forward slashes if the script doesn't read them.
+The computer ignores them, but they're there to help leave explanations for the humans to see who might have to read your program.
 
 To clear the screen type:
 
@@ -67,8 +69,7 @@ set x to "updated text".
 print y. // shows: hello world
 print x. // shows: updated text
 
-Variables don't just have to be one letter you could also use a word as a variable, don't use spaces when dealing
-with variables.
+Variables don't just have to be one letter you could also use a word as a variable, don't use spaces when naming variables.
 
 set WhateverThisVariableIs to false.
 print WhateverThisVariableIs. // shows: false
