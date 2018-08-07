@@ -1,5 +1,3 @@
-// show how to open KOS terminal
-
 Before we can send ships to space we first need to know the basic features of KOS.
 Let's begin with the `print` command. Type the following in your terminal and press
 <ENTER> to enter the piece of code. Keep in mind that ALL lines of code require a period
