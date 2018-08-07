@@ -14,7 +14,11 @@ typing the following will create a file called 'hello', to enter the command pre
 edit hello.
 
 you can now edit the file and make your script for the processor to execute, the other tutorials will show how you can make a 
-working script.
+working script. Keep in mind that files made in game dissapear after the vessel is gone.
+
+To run the file, type:
+
+run hello.
 __________________________________________________________________________________________________________________________________
 
 To use a text editor instead go to your KSP folder and go to /Ships/Script and create an empty file and name it whatever you want
@@ -22,5 +26,19 @@ To use a text editor instead go to your KSP folder and go to /Ships/Script and c
 An example of a valid KOS script file name would be:
 
 hello.ks
+
+Running files you made using text editors is a bit more complex than if you'd make a file in game.
+This is because when you make a script in game the script is locally stored on the ship.
+Files you made with a text editor are saved in the archive, can be accessed from different saved games and won't be lost after
+the vessel is gone. You could compare it with ground control, which has infinite data storage and a spaceship which has limited
+space for data.
+
+To access the archive type:
+
+switch to 0.
+
+To run hello.ks type the same as above:
+
+run hello.
 ___________________________________________________________________________________________________________________________________
 
