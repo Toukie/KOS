@@ -1,3 +1,12 @@
+## 1.1.0 - 2018-08-13
+### Added
+  - Notes file in /lib_toukie/ as a todo list and other notes
+### Edited
+  - Major scoping overhaul: lazyglobal is off in all files except for lib_man_exe. With a few exceptions all variables
+    are	declared using local instead of global.
+  - Functions have been made local. To call functions from other files use:
+    T_FileName["FileName"](Parameter).
+
 ## 1.0.1 - 2018-08-08
 ### Edited
   - Functions have been localized so they don't interfere with other functions

@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 // NOTE Line 40 accidental moon intercept stuff
 // NOTE Final correction has edited Inclination check, needs to be relative 15 degrees ish
 {
@@ -72,7 +70,7 @@ Function InterplanetaryTransfer {
           warpto(TimeTillMoonExit).
           wait until time:seconds > TimeTillMoonExit + 4.
 
-          local MinHeight is 30000.
+          set MinHeight to 30000.
           if ship:orbit:body:atm:exists {
             set MinHeight to ship:orbit:body:atm:height*1.5.
           }
@@ -120,7 +118,7 @@ Function InterplanetaryTransfer {
     print "precision mode on".
     // we have circularized by now so nows the time to match periapsis and apoapsis to the target
 
-    local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
+    local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius , true).
     local TarList is list(time:seconds + eta:apoapsis, 0, 0, DvNeededForTar).
     D_ManExe["ExecuteManeuver"](TarList).
 
@@ -128,8 +126,6 @@ Function InterplanetaryTransfer {
 
     local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
     local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
-    local ApoOrPerHeight is "x".
-    local ApoOrPerETA is "x".
 
     if ManVal1 < ManVal2 {
       set ApoOrPerHeight to ship:orbit:periapsis.
@@ -139,7 +135,7 @@ Function InterplanetaryTransfer {
       set ApoOrPerETA to eta:apoapsis.
     }
 
-    local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
+    local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius, true).
     local CircList is list(time:seconds + ApoOrPerETA, 0, 0, DvNeededForCirc).
     D_ManExe["ExecuteManeuver"](CircList).
   }
@@ -152,9 +148,9 @@ Function MoonTransfer {
   Parameter AccidentalInterceptFromPlanet is false.
 
   if AccidentalInterceptFromPlanet = false {
-    local ThetaChange is T_Inclination["RelativeAngleCalculation"](TargetDestination).
+    T_Inclination["RelativeAngleCalculation"](TargetDestination).
     if ThetaChange > 0.01 {
-      T_Inclination["InclinationMatcher"](TargetDestination).
+    T_Inclination["InclinationMatcher"](TargetDestination).
     }
 
     if TargetDestination:orbit:eccentricity > 0.1 {
@@ -168,7 +164,7 @@ Function MoonTransfer {
     T_Warp["WarpToPhaseAngle"](TargetDestination, 1, ship, ship:body, true).
     T_TransferBurn["MoonInsertionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
 
-    local MoonCorrectionBurnNeeded is true.
+    set MoonCorrectionBurnNeeded to true.
     if ship:orbit:hasnextpatch {
       if ship:orbit:nextpatch:body = TargetDestination {
         set MoonCorrectionBurnNeeded to false.
@@ -203,7 +199,7 @@ Function MoonTransfer {
   }
 
   if ship:orbit:eccentricity > 100 {
-    local EccentricityGoDown is ship:orbit:eccentricity.
+    set EccentricityGoDown to ship:orbit:eccentricity.
     T_Steering["SteeringOrbitRet"]().
     until EccentricityGoDown < 100 {
       lock throttle to min(1, (abs(EccentricityGoDown-100))/100).
@@ -218,8 +214,8 @@ Function MoonTransfer {
   T_TransferBurn["MoonPostEncounterBurn"](TargetPeriapsis, TargetInclination).
 
   if eta:periapsis > 30 {
-    local NewList is list(time:seconds + eta:periapsis, 0, 0, 0).
-    local NewScoreList is list(TargetDestination).
+    set NewList to list(time:seconds + eta:periapsis, 0, 0, 0).
+    set NewScoreList to list(TargetDestination).
 
     local NewRestrictionList is list(
       "realnormal_antinormal",
@@ -232,17 +228,15 @@ Function MoonTransfer {
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
     D_ManExe["ExecuteManeuver"](FinalMan).
 
-    print "checking eccentricity".
     until ship:orbit:eccentricity <= 1 {
-      local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
+      local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius, true).
       local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
       D_ManExe["ExecuteManeuver"](CircList).
     }
 
   } else {
-    print "periapsis too close emergency burn".
     until ship:orbit:eccentricity <= 1 {
-      local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
+      local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius, true).
       local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
       D_ManExe["ExecuteManeuver"](CircList).
     }
@@ -250,8 +244,7 @@ Function MoonTransfer {
 
   // we have circularized by now so nows the time to match periapsis and apoapsis to the target
 
-  print "matching per and apo".
-  local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
+  local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius , true).
   local TarList is list(time:seconds + eta:apoapsis, 0, 0, DvNeededForTar).
   D_ManExe["ExecuteManeuver"](TarList).
 
@@ -259,8 +252,6 @@ Function MoonTransfer {
 
   local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
   local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
-  local ApoOrPerHeight is "x".
-  local ApoOrPerETA is "x".
 
   if ManVal1 < ManVal2 {
     set ApoOrPerHeight to ship:orbit:periapsis.
@@ -270,7 +261,7 @@ Function MoonTransfer {
     set ApoOrPerETA to eta:apoapsis.
   }
 
-  local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
+  local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius, true).
   local CircList is list(time:seconds + ApoOrPerETA, 0, 0, DvNeededForCirc).
   D_ManExe["ExecuteManeuver"](CircList).
 }
@@ -288,11 +279,11 @@ Function MoonToReferencePlanet {
     }
   }
 
-  local lock PosToNegAngle to vcrs(vcrs(ship:velocity:orbit, body:position),ship:body:orbit:velocity:orbit).
-  local lock NegToPosAngle to vcrs(ship:body:orbit:velocity:orbit, vcrs(ship:velocity:orbit, body:position)).
+  lock PosToNegAngle to vcrs(vcrs(ship:velocity:orbit, body:position),ship:body:orbit:velocity:orbit).
+  lock NegToPosAngle to vcrs(ship:body:orbit:velocity:orbit, vcrs(ship:velocity:orbit, body:position)).
 
   set kuniverse:timewarp:warp to (T_Warp["GetAllowedTimeWarp"]()).
-  local CurrentEjectionAngle is 100.
+  set CurrentEjectionAngle to 100.
 
   until CurrentEjectionAngle > 355 or CurrentEjectionAngle < 5 {
     if TargetPlanet:orbit:semimajoraxis > StartingBody:orbit:semimajoraxis {
@@ -310,7 +301,7 @@ Function MoonToReferencePlanet {
       } else {
         set CurrentEjectionAngle to vang(-body:position , -body:orbit:velocity:orbit).
       }
-      local InbetweenEjectionAngle is (CurrentEjectionAngle + 180).
+      set InbetweenEjectionAngle to (CurrentEjectionAngle + 180).
       if InbetweenEjectionAngle > 360 {
         set InbetweenEjectionAngle to InbetweenEjectionAngle - 360.
       }
@@ -319,7 +310,7 @@ Function MoonToReferencePlanet {
     }
   }
 
-  local warpnumber is 1.
+  set warpnumber to 1.
   until warpnumber = 8 {
     set kuniverse:timewarp:warp to (T_Warp["GetAllowedTimeWarp"]() - warpnumber).
     wait 5.
@@ -329,7 +320,7 @@ Function MoonToReferencePlanet {
   set kuniverse:timewarp:warp to 0.
 
   local TargetSMA is ship:altitude + 1.05 * ship:body:soiradius + ship:body:radius.
-  local DvNeededForExit is T_Other["VisViva"](ship:altitude, TargetSMA).
+  local DvNeededForExit is T_Other["VisViva"](ship:altitude, TargetSMA, true).
   local ExitList is list(time:seconds, 0, 0, DvNeededForExit).
   D_ManExe["ExecuteManeuver"](ExitList).
 
@@ -358,13 +349,12 @@ Function MoonToReferencePlanet {
   }
 
   local TargetSMA is (TargetPeriapsis + ship:orbit:periapsis)/2 + ship:body:radius.
-  local DvNeededForTarPer is T_Other["VisViva"](ship:periapsis, TargetSMA).
+  local DvNeededForTarPer is T_Other["VisViva"](ship:periapsis, TargetSMA, true).
   local TarPerList is list(time:seconds + eta:periapsis, 0, 0, DvNeededForTarPer).
   D_ManExe["ExecuteManeuver"](TarPerList).
 
   local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
   local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
-  local ApoOrPerETA is "x".
 
   if ManVal1 < ManVal2 {
     set ApoOrPerETA to eta:periapsis.

@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_ScoreOptions is lex (
@@ -18,7 +16,7 @@ global T_ScoreOptions is lex (
 Function ScoreCircularize {
   Parameter ScoreList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
 
   if ScoreList:length = 2 {
     if ScoreManeuver:orbit:body = ScoreList[1] {
@@ -34,11 +32,11 @@ Function ScoreCircularize {
 Function ScoreInclination {
   Parameter ScoreList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
 
   if ScoreList[0]:istype("scalar") = true {
     local WantedInclin is ScoreList[0].
-    local ThetaChange is abs(ScoreManeuver:orbit:inclination - WantedInclin).
+    set ThetaChange to abs(ScoreManeuver:orbit:inclination - WantedInclin).
     if  ThetaChange < 0.002 {
       set ThetaChange to 0.
     }
@@ -53,18 +51,18 @@ Function ScoreInclination {
   local Omega1  is ScoreManeuver:orbit:LAN.
   local Omega2  is TargetDestination:orbit:LAN.
 
-  local a1 is (sin(Inclin1)*cos(Omega1)).
-  local a2 is (sin(Inclin1)*sin(Omega1)).
-  local a3 is cos(Inclin1).
-  local a123 is v(a1, a2, a3).
+  set a1 to (sin(Inclin1)*cos(Omega1)).
+  set a2 to (sin(Inclin1)*sin(Omega1)).
+  set a3 to cos(Inclin1).
+  set a123 to v(a1, a2, a3).
 
-  local b1 is (sin(Inclin2)*cos(Omega2)).
-  local b2 is (sin(Inclin2)*sin(Omega2)).
-  local b3 is cos(Inclin2).
-  local b123 is v(b1, b2, b3).
+  set b1 to (sin(Inclin2)*cos(Omega2)).
+  set b2 to (sin(Inclin2)*sin(Omega2)).
+  set b3 to cos(Inclin2).
+  set b123 to v(b1, b2, b3).
 
-  local ThetaChange is ARCcos(vdot(a123, b123)).
-  //set Result to ThetaChange.
+  set ThetaChange to ARCcos(vdot(a123, b123)).
+  set Result to ThetaChange.
 
   if ThetaChange < 0.002 {
     set ThetaChange to 0.
@@ -76,7 +74,7 @@ Function ScoreInclination {
 Function ScoreApoapsis {
   Parameter ScoreList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
   local CurrentHeight is ScoreManeuver:orbit:apoapsis.
   local TargetHeight  is ScoreList[0].
 
@@ -86,7 +84,7 @@ Function ScoreApoapsis {
 Function ScorePeriapsis {
   Parameter ScoreList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
   local CurrentHeight is ScoreManeuver:orbit:periapsis.
   local TargetHeight  is ScoreList[0].
 
@@ -110,7 +108,7 @@ Function ScoreVarMatch {
   Parameter ScoreList.
   Parameter ApoPerList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
   local TargetDestination is ScoreList[0].
   local Value1 is OrbitParamGetter(ScoreManeuver, ApoPerList[0]).
   local Value2 is OrbitParamGetter(TargetDestination, ApoPerList[1]).
@@ -143,16 +141,11 @@ Function ScorePerPerMatch {
 Function ScoreMoonTransfer {
   Parameter ScoreList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
   local TargetBody        is ScoreList[0].
   local TargetPeriapsis   is ScoreList[1].
   local TargetInclination is ScoreList[2].
   local InterceptCheck  is false.
-
-  local TransferPenalty    is "x".
-  local PeriapsisPenalty   is "x".
-  local InclinationPenalty is "x".
-  local TotalPenalty is "x".
 
   if TargetInclination = 0 {
     set TargetInclination to 0.01.
@@ -191,13 +184,13 @@ Function ScoreMoonTransfer {
 Function ScoreInterplanetary {
   Parameter ScoreList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
   local TargetBody      is ScoreList[0].
   local TargetPeriapsis is ScoreList[1].
 
-  local TransferPenalty is 10000.
-  local SOIexitPenalty  is 10^6.
-  local PeriapsisPenalty is 10000.
+  set TransferPenalty to 10000.
+  set SOIexitPenalty  to 10^6.
+  set PeriapsisPenalty to 10000.
 
   if ScoreManeuver:orbit:hasnextpatch = true {
     if ScoreManeuver:orbit:nextpatch:body = TargetBody {
@@ -222,8 +215,8 @@ Function ScoreInterplanetary {
     } else {
       set SOIexitPenalty to 0.
 
+      print T_ClosestApp["ClosestApproachFinder"](TargetBody) at(1,36).
       set TransferPenalty to T_ClosestApp["ClosestApproachFinder"](TargetBody).
-      print TransferPenalty at(1,36).
       set TransferPenalty to round(TransferPenalty/(10^6)).
       set PeriapsisPenalty to 10000.
     }
@@ -241,7 +234,7 @@ Function ScoreInterplanetary {
 Function ScoreFinalCorrection {
   Parameter ScoreList.
 
-  local ScoreManeuver is nextnode.
+  set ScoreManeuver to nextnode.
   local TargetBody        is ScoreList[0].
   local TargetPeriapsis   is ScoreList[1].
   local TargetInclination is ScoreList[2].
@@ -250,9 +243,10 @@ Function ScoreFinalCorrection {
     set TargetInclination to 0.01.
   }
 
-  local PeriapsisPenalty is 10^9.
-  local InclinationPenalty is 10^9.
-  local PeriapsisPenalty is round((abs(ScoreManeuver:orbit:periapsis - TargetPeriapsis)/TargetPeriapsis), 2).
+  set PeriapsisPenalty to 10^9.
+  set InclinationPenalty to 10^9.
+
+  set PeriapsisPenalty to round((abs(ScoreManeuver:orbit:periapsis - TargetPeriapsis)/TargetPeriapsis), 2).
 
   if abs(ScoreManeuver:orbit:inclination - TargetInclination) < 15 {
     set InclinationPenalty to 0.

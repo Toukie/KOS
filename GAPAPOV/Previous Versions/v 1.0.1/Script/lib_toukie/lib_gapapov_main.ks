@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_GAPAPOV is lexicon(
@@ -9,17 +7,8 @@ global T_GAPAPOV is lexicon(
 Function GAPAPOV {
   Parameter GivenParameterList.
 
-  local TargetVessel is "x".
-  local TargetBody is "x".
-  local TargetPeriapsis is "x".
-  local TargetInclination is "x".
-  local TarIsPlanet is "x".
-  local NoAccidentalIntercept is "x".
-  local CurIsPlanet is "x".
-
   if GivenParameterList:length = 1 {
     set TargetVessel to vessel(GivenParameterList[0]).
-    print TargetVessel.
     set TargetBody to TargetVessel:body.
     set TargetPeriapsis to TargetVessel:orbit:periapsis.
     set TargetInclination to TargetVessel:orbit:Inclination.
@@ -50,13 +39,11 @@ Function GAPAPOV {
     set CurIsPlanet to false.
   }
 
-  if ship:body = TargetBody {
-    print "already in orbit around " + ship:body:name.
+  if TargetBody = ship:body {
+    print "already in orbit around " +ship:body:name.
   }
 
-  if ship:body = TargetBody {
-    wait 0.
-  } else if CurIsPlanet = false {
+  if CurIsPlanet = false {
 
     if TargetBody:body = ship:body:body {
       // Mun Minmus situation
@@ -85,9 +72,8 @@ Function GAPAPOV {
     if TarIsPlanet = false {
       if TargetBody:body = ship:body {
         T_Transfer["MoonTransfer"](TargetBody, TargetPeriapsis, TargetInclination).
-        HUDtext("We've arrived", 5, 2, 30, red, true).
       }
-      else if TargetBody:body <> ship:body {
+      if TargetBody:body <> ship:body {
         local TemporaryDestination is TargetBody:body.
         local TemporaryPeriapsis is 0.5*(TargetBody:orbit:semimajoraxis - TargetBody:body:radius).
         T_Transfer["InterplanetaryTransfer"](TemporaryDestination, TemporaryPeriapsis, TargetInclination, false).
@@ -97,11 +83,9 @@ Function GAPAPOV {
     }
   }
 
-  if TargetVessel <> "x" {
+  if defined TargetVessel {
     clearscreen.
-    HUDtext("Rendezvous is go", 5, 2, 30, red, true).
     T_Rendezvous["CompleteRendezvous"](TargetVessel).
-    HUDtext("Rendezvous cleared, docking...", 5, 2, 30, red, true).
     T_Docking["Dock"](TargetVessel).
   }
 

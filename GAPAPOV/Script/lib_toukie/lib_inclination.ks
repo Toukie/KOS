@@ -1,3 +1,5 @@
+@lazyglobal off.
+
 // Dont use this when matching inclination with planets out of current SOI
 
 {
@@ -13,35 +15,37 @@ Function RelativeAngleCalculation {
 
   Parameter TargetDestination.
 
-  set Inclin1 to ship:orbit:inclination.
-  set Inclin2 to TargetDestination:orbit:inclination.
+  local Inclin1 is ship:orbit:inclination.
+  local Inclin2 is TargetDestination:orbit:inclination.
 
-  set Omega1  to ship:orbit:LAN.
-  set Omega2  to TargetDestination:orbit:LAN.
+  local Omega1  is ship:orbit:LAN.
+  local Omega2  is TargetDestination:orbit:LAN.
 
-  set a1 to (sin(Inclin1)*cos(Omega1)).
-  set a2 to (sin(Inclin1)*sin(Omega1)).
-  set a3 to cos(Inclin1).
-  set a123 to v(a1, a2, a3).
+  local a1 is (sin(Inclin1)*cos(Omega1)).
+  local a2 is (sin(Inclin1)*sin(Omega1)).
+  local a3 is cos(Inclin1).
+  local a123 is v(a1, a2, a3).
 
-  set b1 to (sin(Inclin2)*cos(Omega2)).
-  set b2 to (sin(Inclin2)*sin(Omega2)).
-  set b3 to cos(Inclin2).
-  set b123 to v(b1, b2, b3).
+  local b1 is (sin(Inclin2)*cos(Omega2)).
+  local b2 is (sin(Inclin2)*sin(Omega2)).
+  local b3 is cos(Inclin2).
+  local b123 is v(b1, b2, b3).
 
-  set thetachange to ARCcos(vdot(a123, b123)).
-  //print "theta: " + thetachange.
+  local  ThetaChange is ARCcos(vdot(a123, b123)).
+  return ThetaChange.
 }
 
 Function AscenDescenFinder {
 
   parameter TarShip.
 
-  set NormalVector1 to vcrs(ship:position - ship:body:position, ship:velocity:orbit).
-  set NormalVector2 to vcrs(TarShip:position - TarShip:body:position, TarShip:velocity:orbit).
+  local NormalVector1 is vcrs(ship:position - ship:body:position, ship:velocity:orbit).
+  local NormalVector2 is vcrs(TarShip:position - TarShip:body:position, TarShip:velocity:orbit).
 
   // DNvector is the cross product of both normal vectors (both are on the same plane)
-  set DNvector to vcrs(NormalVector2, NormalVector1).
+  local DNvector is vcrs(NormalVector2, NormalVector1).
+  local TrueAnomDN is "x".
+  local TrueAnomAN is "x".
 
   // TA of DN
   if vdot(DNvector + body:position, ship:velocity:orbit) > 0 {
@@ -65,38 +69,40 @@ Function AscenDescenFinder {
     set TrueAnomAN to TrueAnomAN -360.
   }
 
+  local ANDNList is list(TrueAnomAN, TrueAnomDN).
+  return ANDNList.
+
 }
 
 Function DeltaVTheta {
   parameter TrueAnomaly.
   parameter ThetaNeeded.
 
-  set SMA    to ship:orbit:semimajoraxis.
-  set rad1   to SMA*(1- ecc*cos(TrueAnomaly)).
-  set velo   to SQRT(body:mu*((2/rad1)-(1/SMA))).
-  set dvincl to (2*velo*sin(ThetaNeeded/2)).
+  local ecc    is ship:orbit:eccentricity.
+  local SMA    is ship:orbit:semimajoraxis.
+  local rad1   is SMA*(1- ecc*cos(TrueAnomaly)).
+  local velo   is SQRT(body:mu*((2/rad1)-(1/SMA))).
+  local DvIncl is (2*velo*sin(ThetaNeeded/2)).
+  return DvIncl.
 }
 
 Function InclinationMatcher {
 
   Parameter TargetDestination.
 
-  AscenDescenFinder(TargetDestination).
+  local ANDNList is AscenDescenFinder(TargetDestination).
+  local TrueAnomAN is ANDNList[0].
+  local TrueAnomDN is ANDNList[1].
+  local TimeNeeded is "x".
 
-  T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomAN).
-  set TimeAN to TimeTillDesiredTrueAnomaly.
-  T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomDN).
-  set TimeDN to TimeTillDesiredTrueAnomaly.
+  local TimeAN is T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomAN).
+  local TimeDN is T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomDN).
+  local ThetaChange is RelativeAngleCalculation(TargetDestination).
 
-  RelativeAngleCalculation(TargetDestination).
+  local ANDv is DeltaVTheta(TrueAnomAN, ThetaChange).
+  local DNDv is DeltaVTheta(TrueAnomDN, ThetaChange).
 
-  DeltaVTheta(TrueAnomAN, ThetaChange).
-  set ANDv to dvincl.
-
-  DeltaVTheta(TrueAnomDN, ThetaChange).
-  set DNDv to dvincl.
-
-  set DvNeeded to min(ANDv, DNDv).
+  local DvNeeded is min(ANDv, DNDv).
 
   if ANDv < DNDv {
     set TimeNeeded to TimeAN.
@@ -111,14 +117,12 @@ Function InclinationMatcher {
 
   local InputList is list(time:seconds + TimeNeeded, 0, DvNeeded, 0).
   local NewScoreList is list(TargetDestination).
-  local NewRestrictionList is IndexFiveFolderder("realnormal_antinormal_radialout_radialin_timeplus_timemin").
-  set FinalMan to T_HillUni["ResultFinder"](InputList, "Inclination", NewScoreList, NewRestrictionList).
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_radialout_radialin_timeplus_timemin").
+  local FinalMan is T_HillUni["ResultFinder"](InputList, "Inclination", NewScoreList, NewRestrictionList).
 
   D_ManExe["DvCalc"](FinalMan).
   D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
   D_ManExe["PerformBurn"](EndDv, StartT).
-
-  RelativeAngleCalculation(TargetDestination).
 }
 }
 print "read lib_inclination".

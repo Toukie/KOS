@@ -1,7 +1,16 @@
-clearscreen.
 set kuniverse:timewarp:warp to 0.
+clearscreen.
 clearvecdraws().
 clearguis().
+
+T_Other["RemoveAllNodes"]().
+
+unlock throttle.
+
+set terminal:width  to 60.
+set terminal:height to 40.
+
+core:doaction("Open Terminal", true).
 
 if true=true  {
  T_Boot["CopyAndRunFile"]("lib_closest_approach", "0:/lib_toukie/").
@@ -15,6 +24,7 @@ if true=true  {
  T_Boot["CopyAndRunFile"]("lib_other", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_phase_angle", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_rendezvous", "0:/lib_toukie/").
+ T_Boot["CopyAndRunFile"]("lib_science", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_stage", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_steering", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_transfer", "0:/lib_toukie/").
@@ -22,15 +32,6 @@ if true=true  {
  T_Boot["CopyAndRunFile"]("lib_true_anomaly", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_warp", "0:/lib_toukie/").
 }
-
-T_Other["RemoveAllNodes"]().
-
-unlock throttle.
-
-set terminal:width  to 90.
-set terminal:height to 100.
-
-core:doaction("Open Terminal", true).
 
 clearscreen.
 

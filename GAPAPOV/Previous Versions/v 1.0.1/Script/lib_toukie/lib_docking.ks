@@ -10,21 +10,24 @@ Function PortGetter {
 
   if PrePickedPort = "none" {
 
-    local portlist is list().
+    set portlist to list().
     for port in NameOfVessel:partsdubbedpattern("dock"){
       portlist:add(port).
     }
 
-    local PortNumber is 0.
-    until false {
+    set ChosenPort to false.
+    set PortNumber to 0.
+    until ChosenPort = true {
       if portlist[PortNumber]:state = "ready" {
-        return portlist[PortNumber].
+        set DockingPort to portlist[PortNumber].
+        portlist:clear.
+        set ChosenPort to true.
       } else {
         set PortNumber to PortNumber + 1.
       }
     }
   } else {
-    return PrePickedPort.
+    set DockingPort to PrePickedPort.
   }
 }
 
@@ -42,7 +45,7 @@ Function Translate {
 Function KillRelVelRCS {
   Parameter TargetDockingPort.
 
-  local lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
+  lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
   until RelativeVelocity:mag < 0.1 {
     Translate(-1*RelativeVelocity).
   }
@@ -58,16 +61,16 @@ Function ApproachDockingPort {
 
   ShipDockingPort:controlfrom.
 
-  local Lock DistanceInFrontOfPort to TargetDockingPort:portfacing:vector:normalized * Distance.
-  local Lock ShipToDIFOP to TargetDockingPort:nodeposition - ShipDockingPort:nodeposition + DistanceInFrontOfPort.
-  local Lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
+  Lock DistanceInFrontOfPort to TargetDockingPort:portfacing:vector:normalized * Distance.
+  Lock ShipToDIFOP to TargetDockingPort:nodeposition - ShipDockingPort:nodeposition + DistanceInFrontOfPort.
+  Lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
 
   until ShipDockingPort:state <> "ready" {
     Translate((ShipToDIFOP:normalized*Speed) - RelativeVelocity).
     clearvecdraws().
     vecdraw(TargetDockingPort:position, DistanceInFrontOfPort, RGB(1,0,0), "DistanceInFrontOfPort", 1.0, true, 0.2).
     vecdraw(v(0,0,0), ShipToDIFOP, RGB(0,1,0), "ShipToDIFOP", 1.0, true, 0.2).
-    local DistanceVector is (TargetDockingPort:nodeposition - ShipDockingPort:nodeposition).
+    set DistanceVector to (TargetDockingPort:nodeposition - ShipDockingPort:nodeposition).
     if vang(ShipDockingPort:portfacing:vector, DistanceVector) < 2 and abs(Distance - DistanceVector:mag) < ErrorAllowed {
       break.
     }
@@ -81,11 +84,11 @@ Function EnsureRange {
   Parameter Distance.
   Parameter Speed.
 
-  local Lock RelativePosition to ship:position - TargetDockingPort:position.
-  local Lock SafetyBubbleVector to (RelativePosition:normalized*distance) - RelativePosition.
-  local Lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
+  Lock RelativePosition to ship:position - TargetDockingPort:position.
+  Lock SafetyBubbleVector to (RelativePosition:normalized*distance) - RelativePosition.
+  Lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
 
-  local BreakLoop is false.
+  set BreakLoop to false.
   until BreakLoop = true {
     Translate((SafetyBubbleVector:normalized*speed) - RelativeVelocity).
     if SafetyBubbleVector:mag < 0.1 {
@@ -103,22 +106,22 @@ Function SidewaysApproach {
 
   ShipDockingPort:controlfrom.
 
-  local lock SideDirection to TargetDockingPort:ship:facing:starvector.
+  Lock SideDirection to TargetDockingPort:ship:facing:starvector.
   if abs(SideDirection*TargetDockingPort:portfacing:vector) = 1 {
     Lock SideDirection to TargetDockingPort:ship:facing:topvector.
   }
 
-  local lock DistanceNextToPort to SideDirection:normalized*Distance.
+  Lock DistanceNextToPort to SideDirection:normalized*Distance.
 
   if (TargetDockingPort:nodeposition - ShipDockingPort:nodeposition - DistanceNextToPort):mag <
      (TargetDockingPort:nodeposition - ShipDockingPort:nodeposition + DistanceNextToPort):mag {
        Lock DistanceNextToPort to (-1*SideDirection*Distance).
      }
 
-  local lock ShipToDNTP to TargetDockingPort:nodeposition - ShipDockingPort:nodeposition + DistanceNextToPort.
-  local lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
+  Lock ShipToDNTP to TargetDockingPort:nodeposition - ShipDockingPort:nodeposition + DistanceNextToPort.
+  Lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
 
-  local BreakLoop is false.
+  set BreakLoop to false.
   until BreakLoop = true {
     clearvecdraws().
     vecdraw(TargetDockingPort:position, DistanceNextToPort, RGB(1,0,0), "DistanceNextToPort", 1.0, true, 0.2).
@@ -135,8 +138,10 @@ Function Dock {
   Parameter TargetDestination.
 
   clearvecdraws().
-  local ShipDockingPort is PortGetter(ship, "none").
-  local TargetDockingPort is PortGetter(TargetDestination, "none").
+  PortGetter(ship, "none").
+  set ShipDockingPort to DockingPort.
+  PortGetter(TargetDestination, "none").
+  set TargetDockingPort to DockingPort.
 
   ShipDockingPort:controlfrom.
   SAS off.

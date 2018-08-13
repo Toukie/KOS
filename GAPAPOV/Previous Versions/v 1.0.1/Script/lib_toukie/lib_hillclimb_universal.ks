@@ -1,13 +1,11 @@
-@lazyglobal off.
+//@lazyglobal off.
 
 {
-
-local BestCandidate is list().
-local Candidates    is list().
 
 ///
 /// MAIN
 ///
+
 // if input = output --> no progress, move on!
 
 global T_HillUni is lex(
@@ -17,8 +15,7 @@ global T_HillUni is lex(
   "ScoreExecuter",       ScoreExecuter@,
   "StepFunction",        StepFunction@,
   "EvenOrUnevenChecker", EvenOrUnevenChecker@,
-  "Improve",             Improve@,
-  "IndexFiveFolderder", IndexFiveFolderder@
+  "Improve",             Improve@
   ).
 
 Function ResultFinder {
@@ -122,7 +119,7 @@ Function Score {
   if ScoreManeuver:eta < 0 {
     set Result to -1*((2^64)/ScoreManeuver:eta).
     print "eta too close                     " at (1, 26).
-    local TimeCopy is BestCandidate[0].
+    set TimeCopy to BestCandidate[0].
     BestCandidate:remove(0).
     BestCandidate:insert(0, TimeCopy+30).
   }
@@ -165,7 +162,7 @@ Function ScoreExecuter {
 /// IMPROVE
 ///
 
-local StepOptions is lex(
+global StepOptions is lex(
   "timeplus",   0,
   "timemin",    1,
   "radialout",  2,
@@ -186,7 +183,7 @@ Function StepFunction {
   Parameter NodeList.
   Parameter RestrictionType.
 
-  local EmptyStepList is StepSizeList:copy.
+  set EmptyStepList to StepSizeList:copy.
 
   if EvenOrUnevenChecker(StepOptions[StepType]) = "uneven" {
     set StepSize to -1 * StepSize.
@@ -228,11 +225,11 @@ Function Improve {
   Parameter RestrictionType.
   Parameter Increment.
 
-  local ScoreToBeat   is Score(NodeList, ScoreType, ScoreList, CurrentDv).
+  set ScoreToBeat   to Score(NodeList, ScoreType, ScoreList, CurrentDv).
   set BestCandidate to NodeList:copy.
   set Candidates    to list().
-  local CandidateScore is 2^60.
   wait 0.
+  //print "improving".
 
   StepFunction("timeplus",   Increment, NodeList, RestrictionType).
   StepFunction("timemin",    Increment, NodeList, RestrictionType).
@@ -263,16 +260,20 @@ Function Improve {
   }
 
 Function CurrentDVGetterx {
-  local eIsp is 0.
-  local MyEngs is list().
-  list engines in MyEngs.
-  for Eng in MyEngs {
-    local EngMaxThrust is max(0.001, eng:maxthrust).
-    set eIsp to eISP + ((EngMaxThrust/maxthrust)*eng:isp).
+  SET eIsp TO 0.
+  List engines IN my_engines.
+  For eng In my_engines{
+    SET eIsp TO eISP + ((eng:maxthrust/maxthrust)*eng:isp).
   }
-  local Ve is eIsp * 9.80665.
+  SET Ve TO eIsp*9.80665.
 
   return (Ve * ln(ship:mass / ship:drymass)).
+}
+
+///
+/// END OF MAIN BRACKETS
+///
+
 }
 
 Function IndexFiveFolderder {
@@ -280,12 +281,5 @@ Function IndexFiveFolderder {
 
   return list(WantedIndex, WantedIndex, WantedIndex, WantedIndex, WantedIndex).
 }
-///
-/// END OF MAIN BRACKETS
-///
-
-}
-
-
 
 print "read lib_hillclimb_universal".

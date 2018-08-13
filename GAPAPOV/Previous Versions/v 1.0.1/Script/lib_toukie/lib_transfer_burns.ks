@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_TransferBurn is lexicon(
@@ -22,8 +20,6 @@ Function InsertionBurn {
 
   T_Warp["WarpToPhaseAngle"](TargetDestination, 1).
   T_Warp["WarpToEjectionAngle"](TargetDestination, 1).
-  local ResultList is T_PhaseAngle["EjectionAngleVelocityCalculation"](TargetDestination).
-  local InsertionBurnDv is ResultList[1].
 
   local NewList is list(time:seconds + 300, 0, 0, InsertionBurnDv).
 
@@ -46,7 +42,7 @@ Function InsertionBurn {
 Function ExitSOI {
   parameter TargetDestination.
 
-  local SOIChange is time:seconds + eta:transition - 5.
+  set SOIChange to time:seconds + eta:transition - 5.
   warpto(SOIChange).
   wait until time:seconds > SOIChange + 10.
   if ship:orbit:hasnextpatch = false  {
@@ -113,7 +109,7 @@ Function MoonInsertionBurn {
   Parameter TargetInclination.
 
   local CombinedSMA is (TargetDestination:orbit:semimajoraxis + ship:altitude + ship:body:radius)/2.
-  local RoughDv is T_Other["VisViva"](ship:altitude, CombinedSMA).
+  local RoughDv is T_Other["VisViva"](ship:altitude, CombinedSMA, true).
 
   local NewList is list(time:seconds + 30, 0, 0, RoughDv).
   local NewScoreList is list(TargetDestination, TargetPeriapsis, TargetInclination).
@@ -180,7 +176,6 @@ Function InclinationMatcher2 {
   if abs(ship:orbit:inclination - TargetInclination) > 5 {
     local NewList is list(time:seconds + 30, 0, 0, 0).
     local NewScoreList is list(TargetInclination).
-    local NewRestrictionList is "x".
     if abs(ship:orbit:inclination - TargetInclination) > 90 {
       print "over 90 deg diff".
       set NewRestrictionList to list(

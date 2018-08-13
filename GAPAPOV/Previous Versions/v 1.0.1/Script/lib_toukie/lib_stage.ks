@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_Stage is lexicon(
@@ -7,13 +5,13 @@ global T_Stage is lexicon(
   "EndStage", EndStage@,
   "LaunchStage", LaunchStage@
   ).
-
+  
 Function StageCheck {
 
-  local PrevThrust is MaxThrust.
+  set PrevThrust to MaxThrust.
 
   when MaxThrust < (PrevThrust - 10) then {
-        local CurrentThrottle is Throttle.
+        set CurrentThrottle to Throttle.
         lock Throttle to 0.
         wait until stage:ready.
   	    stage.

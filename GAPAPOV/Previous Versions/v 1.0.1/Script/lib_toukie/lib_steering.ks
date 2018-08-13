@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_Steering is lexicon(
@@ -18,9 +16,9 @@ Function SteeringOrbitRet {
 
   parameter TimeTill is 0.
 
-  local lockedposition is -velocityat(ship, time:seconds+TimeTill):orbit.
+  set lockedposition to -velocityat(ship, time:seconds+TimeTill):orbit.
   lock steering to lockedposition.
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, lockedposition) < 2 {
       wait 5.
@@ -29,15 +27,16 @@ Function SteeringOrbitRet {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringOrbitPro {
 
   parameter TimeTill is 0.
 
-  local lockedposition is velocityat(ship, time:seconds+TimeTill):orbit.
+  set lockedposition to velocityat(ship, time:seconds+TimeTill):orbit.
   lock steering to lockedposition.
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, lockedposition) < 2 {
       wait 5.
@@ -46,6 +45,7 @@ Function SteeringOrbitPro {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringOrbitNorm {
@@ -58,7 +58,7 @@ Function SteeringOrbitNorm {
     lock steering to TargNorm.
   }
 
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, TargNorm) < 2 {
       wait 5.
@@ -67,6 +67,7 @@ Function SteeringOrbitNorm {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringOrbitAntNorm {
@@ -79,7 +80,7 @@ Function SteeringOrbitAntNorm {
     lock steering to TargNorm.
   }
 
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, TargNorm) < 2 {
       wait 5.
@@ -88,15 +89,16 @@ Function SteeringOrbitAntNorm {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringTargetPro {
   Parameter TarShip.
   Parameter TimeTill is 0.
 
-  local lockedposition is velocityat(ship, time:seconds+TimeTill):orbit - velocityat(TarShip, time:seconds+TimeTill):orbit.
+  set lockedposition to velocityat(ship, time:seconds+TimeTill):orbit - velocityat(TarShip, time:seconds+TimeTill):orbit.
   lock steering to lockedposition.
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, lockedposition) < 2 {
       wait 5.
@@ -105,16 +107,17 @@ Function SteeringTargetPro {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringTargetRet {
   Parameter TarShip.
   Parameter TimeTill is 0.
 
-  local lockedposition is -(velocityat(ship, time:seconds+TimeTill):orbit - velocityat(TarShip, time:seconds+TimeTill):orbit).
+  set lockedposition to -(velocityat(ship, time:seconds+TimeTill):orbit - velocityat(TarShip, time:seconds+TimeTill):orbit).
 
   lock steering to lockedposition.
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, lockedposition) < 2 {
       wait 5.
@@ -123,16 +126,16 @@ Function SteeringTargetRet {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringTarget {
   Parameter TarShip.
   Parameter TimeTill is 0.
 
-  local lock lockedposition to -(positionat(ship, time:seconds+TimeTill) - positionat(TarShip, time:seconds+TimeTill)).
-  // OR local lock (but NOT lock, this overrides local variables called lockedposition)
+  lock lockedposition to -(positionat(ship, time:seconds+TimeTill) - positionat(TarShip, time:seconds+TimeTill)).
   lock steering to lockedposition.
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, lockedposition) < 2 {
       wait 5.
@@ -141,16 +144,17 @@ Function SteeringTarget {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringAntiTarget {
   Parameter TarShip.
   Parameter TimeTill is 0.
 
-  local lockedposition is positionat(ship, time:seconds+TimeTill) - positionat(TarShip, time:seconds+TimeTill).
+  set lockedposition to positionat(ship, time:seconds+TimeTill) - positionat(TarShip, time:seconds+TimeTill).
 
   lock steering to lockedposition.
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, lockedposition) < 2 {
       wait 5.
@@ -159,15 +163,16 @@ Function SteeringAntiTarget {
       }
     }
   }
+  set vangdone to false.
 }
 
 Function SteeringManeuver {
 
   parameter TargetManeuver is nextnode.
 
-  local lockedposition is TargetManeuver:deltav.
+  set lockedposition to TargetManeuver:deltav.
   lock steering to lockedposition.
-  local vangdone is false.
+  set vangdone to false.
   until vangdone = true {
     if vang(ship:facing:vector, lockedposition) < 2 {
       wait 5.
@@ -176,8 +181,8 @@ Function SteeringManeuver {
       }
     }
   }
+  set vangdone to false.
 }
-
 }
 
 print "read lib_steering".

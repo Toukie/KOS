@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_ClosestApp is lexicon(
@@ -30,9 +28,9 @@ Function CATS {
     local RightThird is Right - (Right - Left)/3.
 
     if DistanceAtTime(LeftThird, TargetBody) > DistanceAtTime(RightThird, TargetBody) {
-      set Left  to LeftThird.
+      set left  to LeftThird.
     } else {
-      set Right to RightThird.
+      set right to RightThird.
     }
   }
 }
@@ -42,10 +40,6 @@ Function ClosestApproachFinder {
   Parameter TargetBody.
 
   local ErrorMode is false.
-  local StartTime is 0.
-  local EndTime   is 0.
-  local TimeTillClosestApp is 0.
-  local ClosestApproach is 0.
 
   if nextnode:orbit:hasnextpatch = true {
     if nextnode:orbit:nextpatch:body = TargetBody:body {
@@ -86,10 +80,6 @@ Function OtherClosestApproachFinder {
   Parameter TargetBody.
 
   local ErrorMode is false.
-  local StartTime is 0.
-  local EndTime   is 0.
-  local TimeTillClosestApp is 0.
-  local ClosestApproach is 0.
 
   if nextnode:orbit:hasnextpatch = true {
     if nextnode:orbit:nextpatch:body = TargetBody:body {
@@ -128,6 +118,5 @@ Function OtherClosestApproachFinder {
 ///
 /// NOTE THIS IS A LESS HEAVY VERSION OF THE CLOSEST APPROACH GETTER OVER AT LIB_OTHER
 ///
-}
 
 print "read lib_closest_approach".

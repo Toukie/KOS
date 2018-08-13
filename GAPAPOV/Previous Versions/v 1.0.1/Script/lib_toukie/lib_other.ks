@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_Other is lexicon(
@@ -24,37 +22,40 @@ Function VisViva {
   // At which altitude do you want to start the burn
   Parameter TargetSMA.
   // What's the SMA at the end?
+  Parameter ReturnWanted is false.
 
-  local GM is body:mu.
-  local StartAlt is StartAlt + body:radius.
+  set GM to body:mu.
+  set StartAlt to StartAlt + body:radius.
   // StartAlt parameter does NOT include the body's radius (so it's added here)
-  local VeloStart is SQRT(GM * ((2/StartAlt) - (1/ship:orbit:semimajoraxis)) ).
-  local VeloEnd is SQRT(GM * ((2/StartAlt) - (1/TargetSMA)) ).
-  local DvNeeded is VeloEnd-VeloStart.
+  set VeloStart to SQRT(GM * ((2/StartAlt) - (1/ship:orbit:semimajoraxis)) ).
+  set VeloEnd to SQRT(GM * ((2/StartAlt) - (1/TargetSMA)) ).
+  set DvNeeded to VeloEnd-VeloStart.
 
-  return DvNeeded.
+  if ReturnWanted = true {
+    return DvNeeded.
+  }
 }
 
 Function CurrentDvCalc {
+  Parameter ReturnWanted is false.
 
-  local eIsp is 0.
-  local MyEngs is list().
-  list engines in MyEngs.
-  for Eng in MyEngs {
-    local EngMaxThrust is max(0.001, eng:maxthrust).
-    set eIsp to eISP + ((EngMaxThrust/maxthrust)*eng:isp).
+  SET eIsp TO 0.
+  List engines IN my_engines.
+  For eng In my_engines{
+    SET eIsp TO eISP + ((eng:maxthrust/maxthrust)*eng:isp).
   }
-  local Ve is eIsp * 9.80665.
-  local CurDv is Ve * ln(ship:mass / ship:drymass).
+  SET Ve TO eIsp*9.80665.
 
-  return CurDv.
+  set CurDv to Ve * ln(ship:mass / ship:drymass).
+
+  if ReturnWanted = true {
+    return CurDv.
+  }
 }
 
 /////////////////////////////////
 /////////////////////////////////
 /////////////////////////////////
-
-local MostFavourableOption is "x".
 
 Function DistanceAtTime {
   Parameter T.
@@ -73,10 +74,7 @@ Function ClosestApproachGetter {
   set MostFavourableOption to T.
   print round(SurpassThis) at(1,13).
 
-  local Candidates is list().
-  local StandardStepSize is "x".
-  local ScoringNode is nextnode.
-
+  set Candidates to list().
   if ScoringNode:orbit:hasnextpatch = true {
     set StandardStepSize to ScoringNode:orbit:nextpatch:period * PeriodPrecision.
     //print "StanStep  " +StandardStepSize at (1,7).
@@ -85,8 +83,8 @@ Function ClosestApproachGetter {
     //print "StanStep  " +StandardStepSize at (1,7).
   }
 
-  local StepSize is StandardStepSize.
-  local EndFunction is 0.
+  Set StepSize to StandardStepSize.
+  set EndFunction to 0.
 
   //                  10
   until EndFunction = 50 {
@@ -95,7 +93,7 @@ Function ClosestApproachGetter {
     set EndFunction to EndFunction + 1.
     }
 
-  set StepSize to StandardStepSize.
+  Set StepSize to StandardStepSize.
   set EndFunction to 0.
 
   //                  10
@@ -112,8 +110,7 @@ Function ClosestApproachGetter {
       if CandidateScore < SurpassThis {
         set SurpassThis to CandidateScore.
         set MostFavourableOption to Candidate[0].
-        local ClosestApproach is DistanceAtTime(Candidate[0], Candidate[1]).
-        return ClosestApproach.
+        set ClosestApproach to DistanceAtTime(Candidate[0], Candidate[1]).
       }
     }
 }
@@ -122,31 +119,33 @@ Function ClosestApproachRefiner {
   Parameter TargetDestination.
   Parameter PrecisionNumber is 0.01. // 0.05
 
-  local ScoringNode is nextnode.
-  local T is "x".
+  set ScoringNode to nextnode.
 
   if ScoringNode:orbit:hasnextpatch = true {
     set T to time:seconds + 0.5 * ScoringNode:orbit:nextpatch:period.
   } else {
-    set T to time:seconds + 0.5 * ScoringNode:orbit:period.
+  set T to time:seconds + 0.5 * ScoringNode:orbit:period.
   }
 
-  local SurpassThis is DistanceAtTime(T, TargetDestination).
-
-  local ClosestApproach is ClosestApproachGetter(PrecisionNumber, T, SurpassThis, TargetDestination).
+  set SurpassThis to DistanceAtTime(T, TargetDestination).
+  //print PrecisionNumber.
+  //print t.
+  //print SurpassThis.
+  //print TargetDestination.
+  ClosestApproachGetter(PrecisionNumber, T, SurpassThis, TargetDestination).
   //print ClosestApproach.
 
-  local multiplier is 0.05.
+  set multiplier to 0.05.
 
   if ScoringNode:orbit:hasnextpatch = true {
   //  until multiplier*ScoringNode:orbit:nextpatch:period < 1 {
       //set multiplier to multiplier/10.
-      set ClosestApproach to ClosestApproachGetter(multiplier, MostFavourableOption, ClosestApproach, TargetDestination).
+      ClosestApproachGetter(multiplier, MostFavourableOption, ClosestApproach, TargetDestination).
   //  }
   } else {
   //  until multiplier*ScoringNode:orbit:period < 1 {
     //  set multiplier to multiplier/10.
-      set ClosestApproach to ClosestApproachGetter(multiplier, MostFavourableOption, ClosestApproach, TargetDestination).
+      ClosestApproachGetter(multiplier, MostFavourableOption, ClosestApproach, TargetDestination).
   //  }
   }
 
@@ -158,6 +157,7 @@ Function ClosestApproachRefiner {
   print "Gm:    " + round(ClosestApproach/1000000000) + "           " at(1,13).
   return ClosestApproach.
 }
+
 
 ///////////////////
 ///////////////////

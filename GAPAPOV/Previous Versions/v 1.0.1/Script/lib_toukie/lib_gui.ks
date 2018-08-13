@@ -1,44 +1,16 @@
-@lazyglobal off.
-
 {
 
 global T_GUI is lexicon(
   "CompleteParameterGUI", CompleteParameterGUI@
   ).
 
-local gui is gui(400).
-local gui1 is gui(300).
-local gui2 is gui(300).
-
-local textbox1 is "x".
-local textbox2 is "x".
-local textbox3 is "x".
-local RendText is "x".
-local RendWindows is "x".
-
-local TargetBody is "x".
-local TargetPeriapsis is "x".
-local TargetInclination is "x".
-local ParameterList is list().
-
-local GUIEmptyBodyList is list().
-
-local ErrorBoolean is "x".
-local ErrorBoolean1 is "x".
-local ErrorMessage1 is "x".
-local ErrorMessage2 is "x".
-local ErrorMessage001 is "x".
-local ErrorMessage101 is "x".
-local ErrorMessage102 is "x".
-local ErrorMessage103 is "x".
-local ErrorMessage104 is "x".
-local ErrorMessage201 is "x".
-local ErrorMessage202 is "x".
-local ErrorMessage203 is "x".
-
-local FinishProcedure is "x".
-
 Function GUISetup1 {
+  set gui to gui(400).
+  set gui1 to gui(300).
+  set gui2 to gui(300).
+
+  set RendWindows to false.
+  /// GUI Input window
 
   local label1 is gui:addlabel("<b><size=30>ToukieDatak's GAPAPOV!</size></b>").
   set label1:style:align to "center".
@@ -66,8 +38,8 @@ Function GUISetup1 {
   gui:addlabel("<size=15>Inclination at the target destination:</size>").
   set textbox3 to gui:addtextfield("0").
   gui:addlabel("<size=15>    </size>").
-  local RendButton  is gui:addbutton("rendezvous").
-  local applybutton is gui:addbutton("apply").
+  set RendButton  to gui:addbutton("rendezvous").
+  set applybutton to gui:addbutton("apply").
 
   gui:show().
 
@@ -111,7 +83,7 @@ Function RendOptions {
   } else {
     set RendText to gui4:addtextfield("Eagle").
   }
-  local RendConf is gui4:addbutton("confirm").
+  set RendConf to gui4:addbutton("confirm").
   gui4:show().
   set RendConf:onclick to RendOptionsConf@.
 }
@@ -124,7 +96,6 @@ Function RendOptionsConf {
 Function BodyNameCheck {
   local GivenName is textbox1:text.
   set GUIEmptyBodyList to list().
-  local BodyList is list().
   list bodies in BodyList.
   For IndividualBody in BodyList {
     if IndividualBody:name = GivenName {
@@ -195,19 +166,18 @@ Function InclinationCheck {
 }
 
 Function FalseErrorSetter {
-  set ErrorBoolean to 0.
-  set ErrorBoolean1 to 0.
-  set ErrorMessage1 to 0.
-  set ErrorMessage2 to 0.
-  set ErrorMessage001 to 0.
-  set ErrorMessage101 to 0.
-  set ErrorMessage102 to 0.
-  set ErrorMessage103 to 0.
-  set ErrorMessage104 to 0.
-  set ErrorMessage201 to 0.
-  set ErrorMessage202 to 0.
-  set ErrorMessage203 to 0.
-
+  set ErrorBoolean to false.
+  set ErrorBoolean1 to false.
+  set ErrorMessage1 to false.
+  set ErrorMessage2 to false.
+  set ErrorMessage001 to false.
+  set ErrorMessage101 to false.
+  set ErrorMessage102 to false.
+  set ErrorMessage103 to false.
+  set ErrorMessage104 to false.
+  set ErrorMessage201 to false.
+  set ErrorMessage202 to false.
+  set ErrorMessage203 to false.
 }
 
 /// GUI 1 cancel / confirm buttons
@@ -276,14 +246,11 @@ Function ErrorMessageShower {
 //
 
 Function CompleteParameterGUI {
-  set RendWindows to false.
-  set FinishProcedure to false.
-
   GUISetup1().
   GUISetup2().
-
+  set FinishProcedure to false.
   until FinishProcedure = true {
-    wait 1.
+    wait 2.
   }
   clearguis().
   if RendWindows = false {
@@ -292,11 +259,52 @@ Function CompleteParameterGUI {
     set TargetInclination to textbox3:text:tonumber().
     set ParameterList to list(TargetBody, TargetPeriapsis, TargetInclination).
   } else {
-    local TargetVessel is RendText:text.
+    set TargetVessel to RendText:text.
     set ParameterList to list(TargetVessel).
   }
+
   return ParameterList.
 }
 
+
+  ////////////////
+ /// NOT USED ///
+////////////////
+
+Function ArrivedAtPlanetGUI {
+  set gui3 to gui(300).
+  set FinishProcedurex to false.
+  set gui3:addlabel("Although the ship isn't at its destination, it might not have enough Dv to make it."):style:align to "center".
+  set gui3:addlabel("Current Dv left:"):style:align to "center".
+  local CurrentDv is T_Other["CurrentDvCalc"](true).
+  print CurrentDv.
+  set gui3:addlabel(char(34) + round(CurrentDv) + char(34)):style:align to "center".
+  set gui3:addlabel("To continue without refueling press continue."):style:align to "center".
+  set gui3:addlabel("To stop here for now press exit, after refueling type 'reboot.' in the terminal."):style:align to "center".
+  local continuebutton is gui3:addbutton("continue").
+  local exitbutton is gui3:addbutton("exit").
+
+  gui3:show().
+
+  set ContinueButton:onclick to ContinueGUI@.
+  set ExitButton:onclick to ExitGUI@.
+
+  wait until FinishProcedurex = true.
 }
+
+Function ContinueGUI {
+  gui3:hide().
+  gui3:dispose().
+  set FinishProcedurex to true.
+  set ContinueJourney to true.
+  wait 1.
+}
+
+Function ExitGUI {
+  gui3:hide().
+  gui3:dispose().
+  set FinishProcedurex to true.
+  set ContinueJourney to false.
+}
+
 print "read lib_gui".

@@ -1,0 +1,17 @@
+lib_hillclimb_man_exe is going to replaced with a better version for now it will just
+be ignored
+
+Instead of marking with T_ it will be replaced with D_
+
+circularize before calculating phase angles
+
+HUDtext("some text", 5, 2, 30, red, true).
+
+GUI showing if not in orbit
+GUI choosing ap pe for circularize, countdown timer if no option was selected
+
+when interplanetary transferring check if accidental moon intercept is before
+or after correction burn.
+___________
+
+skipping hillclimb_man_exe for now

@@ -1,5 +1,3 @@
-@lazyglobal off.
-
 {
 
 global T_Warp is lexicon(
@@ -30,8 +28,8 @@ Function WarpToPhaseAngle {
   Parameter ReferenceBody is sun.
   Parameter SlowWarp is false.
 
-  local CurrentPhaseAngle is T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
-  local TargetPhaseAngle  is T_PhaseAngle["PhaseAngleCalculation"](TargetPlanet, StartingBody, ReferenceBody).
+  set CurrentPhaseAngle to T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody, true).
+  set TargetPhaseAngle  to T_PhaseAngle["PhaseAngleCalculation"](TargetPlanet, StartingBody, ReferenceBody, true).
   print TargetPhaseAngle at(1,6).
 
   if SlowWarp = true {
@@ -41,7 +39,7 @@ Function WarpToPhaseAngle {
     set kuniverse:timewarp:warp to 10.
   }
   until T_Other["ish"](CurrentPhaseAngle, TargetPhaseAngle, ishyness) {
-    set CurrentPhaseAngle to T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
+    set CurrentPhaseAngle to T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody, true).
     print CurrentPhaseAngle at (1,5).
   }
 
@@ -71,12 +69,11 @@ Function WarpToEjectionAngle {
   Parameter Ishyness.
   Parameter StartingBody is ship:body.
 
-  local ResultList is T_PhaseAngle["EjectionAngleVelocityCalculation"](TargetPlanet).
-  local EjectionAng is ResultList[0].
+  T_PhaseAngle["EjectionAngleVelocityCalculation"](TargetPlanet).
 
-  local CurrentEjectionAngle is 1000. // nonsense value for now
-  local lock PosToNegAngle to vcrs(vcrs(ship:velocity:orbit, body:position),ship:body:orbit:velocity:orbit).
-  local lock NegToPosAngle to vcrs(ship:body:orbit:velocity:orbit, vcrs(ship:velocity:orbit, body:position)).
+  set CurrentEjectionAngle to 1000. // nonsense value for now
+  lock PosToNegAngle to vcrs(vcrs(ship:velocity:orbit, body:position),ship:body:orbit:velocity:orbit).
+  lock NegToPosAngle to vcrs(ship:body:orbit:velocity:orbit, vcrs(ship:velocity:orbit, body:position)).
 
   print "ejection angle needed: " + EjectionAng.
 
@@ -103,7 +100,7 @@ Function WarpToEjectionAngle {
   }
  }
 
- local warpnumber is 2.
+ set warpnumber to 2.
  until warpnumber = 8 {
    set kuniverse:timewarp:warp to (GetAllowedTimeWarp() - warpnumber).
    wait 5.
