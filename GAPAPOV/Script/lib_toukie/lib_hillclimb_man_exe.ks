@@ -1,158 +1,153 @@
+@lazyglobal off.
+
 {
 
-global D_ManExe is lexicon(
-  "DvCalc", DvCalc@,
-  "TimeTillManeuverBurn", TimeTillManeuverBurn@,
-  "PerformBurn", PerformBurn@,
+global T_ManeuverExecute is lexicon(
   "ExecuteManeuver", ExecuteManeuver@
   ).
-
-Function DvCalc {
-
-  Parameter Input. // list of node-worthy items
-
-  set FinalManeuver to node(Input[0], Input[1], Input[2], Input[3]).
-  add FinalManeuver.
-  wait 0.
-  set DvNeeded to FinalManeuver:deltav:mag.
-
-  SET eIsp TO 0.
-  List engines IN my_engines.
-  For eng In my_engines{
-    SET eIsp TO eISP + ((eng:maxthrust/maxthrust)*eng:isp).
-  }
-  SET Ve TO eIsp*9.80665.
-
-  set CurDv to Ve * ln(ship:mass / ship:drymass).
-  set EndDv to CurDv - DvNeeded.
-  //print "Current Dv: " + CurDv.
-  //print "Final Dv:   " + EndDv.
-
-}
-///
-///
-///
 
 Function TimeTillManeuverBurn {
 
   Parameter StartTime.
-  Parameter DvNeeded.
+  Parameter TargetManeuver is nextnode.
   Parameter ThrustLimit is 100.
 
-  SET A0 TO (Maxthrust/mass).
-  SET eIsp TO 0.
-  List engines IN my_engines.
-  For eng In my_engines{
-    SET eIsp TO eISP + ((eng:maxthrust/maxthrust)*eng:isp).
+  local DvNeeded is TargetManeuver:deltav:mag.
+  local LocalMaxThrust is max(0.001, maxthrust).
+
+  local Accel0 is (LocalMaxThrust/mass).
+  local eIsp is 0.
+  local EngList is list().
+
+  list engines in EngList.
+  for eng in EngList{
+    local EngMax is max(0.001, eng:maxthrust).
+    set eIsp to eISP + ((EngMax/LocalMaxThrust)*eng:isp).
   }
-  SET Ve TO eIsp*9.80665.
-  SET FinalMass TO (mass*constant():e^(-1*DvNeeded/Ve)).
-  SET A1 TO (Maxthrust/FinalMass).
-  local BurnTime is (DvNeeded/((A0+A1)/2)).
-  SET BurnTime TO BurnTime * (100/ThrustLimit).
+  local Ve is eIsp*9.80665.
+  local FinalMass is (mass*constant():e^(-1*DvNeeded/Ve)).
+  local Accel1 is (LocalMaxThrust/FinalMass).
+  local BurnTime is (DvNeeded/((Accel0 + Accel1)/2)).
+  local BurnTime is BurnTime * (100/ThrustLimit).
 
-  set ETAStartT to (StartTime - BurnTime/2).
-  set StartT to (ETAStartT+time:seconds).
-  //print "eta node: " + StartTime at(1,19).
-  //print "eta Start Time: " + ETAStartT at(1,20).
-  //print "burn time: " + BurnTime at(1,21).
-  //print "eta man: " + (StartTime + time:seconds) at(1,22).
-  //print "absolute start time: " + StartT at(1,23).
-
+  local ETAStartT is (StartTime - BurnTime/2).
+  local StartT is (ETAStartT+time:seconds).
+  return StartT.
 }
 
-///
-///
-///
+Function PerformBurn {
 
-// TIME:SECONDS GETS ADDED HERE
-FUNCTION PerformBurn {
-
-  Parameter EndDv.
   Parameter StartT.
   Parameter ThrustLimit is 100.
-  Parameter NoManeuver  is false.
 
-  set StopBurn to false.
+  local StopBurn is false.
 
-  if NoManeuver = false {
-    T_Steering["SteeringManeuver"]().
-    if nextnode:deltav:mag < 0.02 {
-      set StopBurn to true.
-    }
+  T_Steering["SteeringManeuver"]().
+
+  if nextnode:deltav:mag < 0.02 {
+    set StopBurn to true.
   }
 
   warpto(StartT-10).
 
-  if NoManeuver = false {
-    lock steering to nextnode:deltav.
-  }
+  lock steering to nextnode:deltav.
 
   wait until time:seconds > StartT.
-  //print "ready to burn".
+
+  local OldDeltaVList is list().
+  local OldDeltaVCount is 0.
+  local OldDeltaVAverage is 10^(-9).
+  local NewDeltaVList is list().
+  local NewDeltaVCount is 0.
+  local NewDeltaVAverage is 0.
 
   until StopBurn = true {
 
-    SET eIsp TO 0.
-    List engines IN my_engines.
-    For eng In my_engines{
-      SET eIsp TO eISP + ((eng:maxthrust/maxthrust)*eng:isp).
-      SET eng:ThrustLimit to ThrustLimit.
+    if OldDeltaVCount < 25 {
+      set OldDeltaVCount to OldDeltaVCount + 1.
+      set OldDeltaVAverage to 10^(-9).
+      OldDeltaVList:add(nextnode:deltav:mag).
+    } else {
+      for DeltaVMag in OldDeltaVList {
+        set OldDeltaVAverage to OldDeltaVAverage + DeltaVMag.
+      }
+      set OldDeltaVAverage to round((OldDeltaVAverage / OldDeltaVCount), 5).
+      set OldDeltaVCount to 0.
     }
-    SET Ve TO eIsp*9.80665.
+    wait 0.
 
-    set CurDv to Ve * ln(ship:mass / ship:drymass).
+    if NewDeltaVCount < 25 {
+      set NewDeltaVCount to NewDeltaVCount + 1.
+      set NewDeltaVAverage to 0.
+      NewDeltaVList:add(nextnode:deltav:mag).
+    } else {
+      for DeltaVMag in NewDeltaVList {
+        set NewDeltaVAverage to NewDeltaVAverage + DeltaVMag.
+      }
+      set NewDeltaVAverage to round((NewDeltaVAverage / NewDeltaVCount), 5).
+      set NewDeltaVCount to 0.
+    }
+    wait 0.
 
-    set MaxAcc to ship:maxthrust/ship:mass.
+    local LocalMaxThrust is max(0.001, maxthrust).
+    local eIsp is 0.
+    local EngList is list().
 
-    set DeltaVMag to (CurDv - EndDv).
-    lock throttle to MIN(DeltaVMag/MaxAcc, 1).
-    if DeltaVMag < 0 {
+    list engines in EngList.
+    for eng in EngList{
+      local EngMax is max(10^(-9), eng:maxthrust).
+      set eIsp to eISP + ((EngMax/LocalMaxThrust)*eng:isp).
+    }
+    local Ve is eIsp*9.80665.
+    local CurDv   to Ve * ln(ship:mass / ship:drymass).
+    local MaxAcc  to MaxThrust/ship:mass.
+    local MaxAcc  to max(0.001, MaxAcc).
+
+    lock throttle to min(nextnode:deltav:mag/MaxAcc, 1).
+
+    if MaxThrust > 0 {
+      local CurThrust is throttle * MaxThrust.
+      if CurThrust < 0.001 {
+        lock throttle to 0.
+        HUDtext("Throttle near 0, ending burn.", 5, 2, 30, green, false).
+        set StopBurn to true.
+      }
+    }
+
+    if nextnode:deltav:mag < 0.002 {
+        lock throttle to 0.
+        HUDtext("Dv left very small, ending burn.", 5, 2, 30, green, false).
+        wait 3.
+        set StopBurn to true.
+      }
+
+    if OldDeltaVAverage < NewDeltaVAverage {
       lock throttle to 0.
-    }
-
-    if throttle < 0.00001 {
-      set throttle to 0.
+      HUDtext("Detected increase of Dv (" + round(NewDeltaV, 3) + " Dv left), ending burn.", 5, 2, 30, green, false).
+      HUDtext("OldDv: " + OldDeltaVAverage, 5, 2, 30, green, true).
+      HUDtext("NewDv: " + NewDeltaVAverage, 5, 2, 30, green, true).
+      wait 1.
       set StopBurn to true.
     }
-
-    if NoManeuver = false {
-      if nextnode:deltav:mag < 0.02 {
-	       set throttle to 0.
-         wait 3.
-	       set StopBurn to true.
-
-	      }
-    }
- }
-
-  unlock steering.
-  until hasnode = false {
-    wait 1.
-    remove nextnode.
-    wait 1.
   }
-
-  For eng In my_engines{
-    SET eng:ThrustLimit to 100.
-  }
-
-  //print "--".
-  ///print "current dv: " + CurDv.
-  ///print "end dv:     " + EndDv.
-  ///print "dv left:    " + DeltaVMag.
 }
 
 Function ExecuteManeuver {
   Parameter NodeWorthyList.
 
-  if round((abs(NodeWorthyList[1]) + abs(NodeWorthyList[2]) + abs(NodeWorthyList[3])), 2) > 0 {
-  DvCalc(NodeWorthyList).
-  TimeTillManeuverBurn(FinalManeuver:eta, DvNeeded).
-  wait 0.
-  PerformBurn(EndDv, StartT).
+  local FinalManeuver is node(NodeWorthyList[0], NodeWorthyList[1], NodeWorthyList[2], NodeWorthyList[3]).
+  add FinalManeuver.
+  wait 1.
+
+  if nextnode:deltav:mag > 0.1 {
+    local TimeTill is TimeTillManeuverBurn(FinalManeuver:eta, FinalManeuver).
+    PerformBurn(TimeTill).
+    unlock steering.
   }
+  remove nextnode.
 }
 
 }
+
+
 print "read lib_hillclimb_man_exe".

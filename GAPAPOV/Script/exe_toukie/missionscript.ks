@@ -2,6 +2,7 @@ clearscreen.
 set kuniverse:timewarp:warp to 0.
 clearvecdraws().
 clearguis().
+set config:ipu to 200.
 
 if true=true  {
  T_Boot["CopyAndRunFile"]("lib_closest_approach", "0:/lib_toukie/").
@@ -25,6 +26,7 @@ if true=true  {
 
 T_Other["RemoveAllNodes"]().
 
+lock throttle to 0.
 unlock throttle.
 
 set terminal:width  to 90.

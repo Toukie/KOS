@@ -1,3 +1,7 @@
+## 1.1.1 - 2018-08-14
+### Edited
+  - lib_hillclimb_man_exe now has revamped maneuver node execution.
+
 ## 1.1.0 - 2018-08-13
 ### Added
   - Notes file in /lib_toukie/ as a todo list and other notes

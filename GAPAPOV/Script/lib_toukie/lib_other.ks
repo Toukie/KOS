@@ -9,7 +9,8 @@ global T_Other is lexicon(
   "DistanceAtTime", DistanceAtTime@,
   "ClosestApproachGetter", ClosestApproachGetter@,
   "ClosestApproachRefiner", ClosestApproachRefiner@,
-  "RemoveAllNodes", RemoveAllNodes@
+  "RemoveAllNodes", RemoveAllNodes@,
+  "NodeFromVector", NodeFromVector@
   ).
 
 Function ish {
@@ -168,6 +169,22 @@ Function RemoveAllNodes {
     remove nextnode.
     wait 1.
   }
+}
+
+Function NodeFromVector {
+  Parameter StartVector.
+  Parameter TimeTillNode is time:seconds.
+
+  local ShipPrograde is velocityat(ship, TimeTillNode):orbit.
+  local ShipPosition is positionat(ship, TimeTillNode) - body:position.
+  local ShipNormal   is vcrs(ShipPrograde, ShipPosition).
+  local ShipRadial   is vcrs(ShipNormal, ShipPrograde).
+
+  local ProgradeComponent is vdot(StartVector, ShipPrograde:normalized).
+  local NormalComponent   is vdot(StartVector, ShipNormal:normalized).
+  local RadialComponent   is vdot(StartVector, ShipRadial:normalized).
+
+  return list(TimeTillNode, RadialComponent, NormalComponent, ProgradeComponent).
 }
 }
 print "read lib_other".

@@ -165,7 +165,7 @@ Function SteeringManeuver {
 
   parameter TargetManeuver is nextnode.
 
-  local lockedposition is TargetManeuver:deltav.
+  local lock lockedposition to TargetManeuver:deltav.
   lock steering to lockedposition.
   local vangdone is false.
   until vangdone = true {

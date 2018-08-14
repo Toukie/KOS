@@ -38,9 +38,7 @@ Function InsertionBurn {
     ).
 
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Interplanetary", NewScoreList, NewRestrictionList).
-  D_ManExe["DvCalc"](FinalMan).
-  D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-  D_ManExe["PerformBurn"](EndDv, StartT).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
 Function ExitSOI {
@@ -75,9 +73,7 @@ Function CorrectionBurn {
     ).
 
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Interplanetary", NewScoreList, NewRestrictionList).
-  D_ManExe["DvCalc"](FinalMan).
-  D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-  D_ManExe["PerformBurn"](EndDv, StartT).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
 Function FinalCorrectionBurn {
@@ -98,9 +94,7 @@ Function FinalCorrectionBurn {
     ).
 
   local FinalMan is T_HillUni["ResultFinder"](NewList, "FinalCorrection", NewScoreList, NewRestrictionList).
-  D_ManExe["DvCalc"](FinalMan).
-  D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-  D_ManExe["PerformBurn"](EndDv, StartT).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
 ///
@@ -126,7 +120,7 @@ Function MoonInsertionBurn {
     ).
   // ^^^ first value retrograde
   local FinalMan is T_HillUni["ResultFinder"](NewList, "MoonTransfer", NewScoreList, NewRestrictionList).
-  D_ManExe["ExecuteManeuver"](FinalMan).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
 Function MoonCorrectionBurn {
@@ -145,7 +139,7 @@ Function MoonCorrectionBurn {
     ).
 
   local FinalMan is T_HillUni["ResultFinder"](NewList, "MoonTransfer", NewScoreList, NewRestrictionList).
-  D_ManExe["ExecuteManeuver"](FinalMan).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
 Function MoonPostEncounterBurn {
@@ -168,7 +162,7 @@ Function MoonPostEncounterBurn {
       "realnormal_antinormal_timeplus_timemin_prograde_retrograde"
       ).
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-    D_ManExe["ExecuteManeuver"](FinalMan).
+    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   } else {
     print "periapsis is looking good".
   }
@@ -201,7 +195,7 @@ Function InclinationMatcher2 {
         ).
     }
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Inclination", NewScoreList, NewRestrictionList).
-    D_ManExe["ExecuteManeuver"](FinalMan).
+    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   }
 }
 }

@@ -63,7 +63,7 @@ Function InterplanetaryTransfer {
             "realnormal_antinormal_timeplus_timemin"
             ).
           local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-          D_ManExe["ExecuteManeuver"](FinalMan).
+          T_ManeuverExecute["ExecuteManeuver"](FinalMan).
         }
 
         if NoAccidentalIntercept = true {
@@ -88,7 +88,7 @@ Function InterplanetaryTransfer {
               "realnormal_antinormal_timeplus_timemin"
               ).
             local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-            D_ManExe["ExecuteManeuver"](FinalMan).
+            T_ManeuverExecute["ExecuteManeuver"](FinalMan).
           }
         }
 
@@ -111,9 +111,7 @@ Function InterplanetaryTransfer {
     ).
 
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-  D_ManExe["DvCalc"](FinalMan).
-  D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-  D_ManExe["PerformBurn"](EndDv, StartT).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
   if PreciseCirc = true {
 
@@ -122,7 +120,7 @@ Function InterplanetaryTransfer {
 
     local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
     local TarList is list(time:seconds + eta:apoapsis, 0, 0, DvNeededForTar).
-    D_ManExe["ExecuteManeuver"](TarList).
+    T_ManeuverExecute["ExecuteManeuver"](TarList).
 
     // check if we need to go to apo or per to circularize
 
@@ -141,7 +139,7 @@ Function InterplanetaryTransfer {
 
     local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
     local CircList is list(time:seconds + ApoOrPerETA, 0, 0, DvNeededForCirc).
-    D_ManExe["ExecuteManeuver"](CircList).
+    T_ManeuverExecute["ExecuteManeuver"](CircList).
   }
 }
 
@@ -230,13 +228,13 @@ Function MoonTransfer {
       ).
 
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-    D_ManExe["ExecuteManeuver"](FinalMan).
+    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
     print "checking eccentricity".
     until ship:orbit:eccentricity <= 1 {
       local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
       local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
-      D_ManExe["ExecuteManeuver"](CircList).
+      T_ManeuverExecute["ExecuteManeuver"](CircList).
     }
 
   } else {
@@ -244,7 +242,7 @@ Function MoonTransfer {
     until ship:orbit:eccentricity <= 1 {
       local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
       local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
-      D_ManExe["ExecuteManeuver"](CircList).
+      T_ManeuverExecute["ExecuteManeuver"](CircList).
     }
   }
 
@@ -253,7 +251,7 @@ Function MoonTransfer {
   print "matching per and apo".
   local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
   local TarList is list(time:seconds + eta:apoapsis, 0, 0, DvNeededForTar).
-  D_ManExe["ExecuteManeuver"](TarList).
+  T_ManeuverExecute["ExecuteManeuver"](TarList).
 
   // check if we need to go to apo or per to circularize
 
@@ -272,7 +270,7 @@ Function MoonTransfer {
 
   local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
   local CircList is list(time:seconds + ApoOrPerETA, 0, 0, DvNeededForCirc).
-  D_ManExe["ExecuteManeuver"](CircList).
+  T_ManeuverExecute["ExecuteManeuver"](CircList).
 }
 
 Function MoonToReferencePlanet {
@@ -331,7 +329,7 @@ Function MoonToReferencePlanet {
   local TargetSMA is ship:altitude + 1.05 * ship:body:soiradius + ship:body:radius.
   local DvNeededForExit is T_Other["VisViva"](ship:altitude, TargetSMA).
   local ExitList is list(time:seconds, 0, 0, DvNeededForExit).
-  D_ManExe["ExecuteManeuver"](ExitList).
+  T_ManeuverExecute["ExecuteManeuver"](ExitList).
 
   local CriticalHeight is 100000.
   if ship:body:body:atm:exists {
@@ -354,13 +352,13 @@ Function MoonToReferencePlanet {
       "realnormal_antinormal_timeplus_timemin_prograde_retrograde"
       ).
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-    D_ManExe["ExecuteManeuver"](FinalMan).
+    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   }
 
   local TargetSMA is (TargetPeriapsis + ship:orbit:periapsis)/2 + ship:body:radius.
   local DvNeededForTarPer is T_Other["VisViva"](ship:periapsis, TargetSMA).
   local TarPerList is list(time:seconds + eta:periapsis, 0, 0, DvNeededForTarPer).
-  D_ManExe["ExecuteManeuver"](TarPerList).
+  T_ManeuverExecute["ExecuteManeuver"](TarPerList).
 
   local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
   local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
@@ -400,9 +398,7 @@ Function MoonToReferencePlanet {
     ).
 
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-  D_ManExe["DvCalc"](FinalMan).
-  D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-  D_ManExe["PerformBurn"](EndDv, StartT).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
  }
 

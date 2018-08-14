@@ -14,17 +14,13 @@ Function EnsureSmallerOrbit {
   if ship:orbit:periapsis > TargetDestination:orbit:periapsis {
     local DvNeeded is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + 0.9*TargetDestination:periapsis)/2 + ship:body:radius).
     local LowerList1 is list(time:seconds+eta:apoapsis, 0, 0, DvNeeded).
-    D_ManExe["DvCalc"](LowerList1).
-    D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-    D_ManExe["PerformBurn"](EndDv, StartT).
+    T_ManeuverExecute["ExecuteManeuver"](LowerList1).
   }
 
   if ship:orbit:apoapsis > TargetDestination:orbit:apoapsis {
     local DvNeeded is T_Other["VisViva"](ship:orbit:periapsis, (ship:orbit:periapsis + 0.9*TargetDestination:apoapsis)/2 + ship:body:radius).
     local LowerList2 is list(time:seconds+eta:periapsis, 0, 0, DvNeeded).
-    D_ManExe["DvCalc"](LowerList2).
-    D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-    D_ManExe["PerformBurn"](EndDv, StartT).
+    T_ManeuverExecute["ExecuteManeuver"](LowerList2).
   }
 }
 
@@ -43,6 +39,7 @@ Function RendezvousSetup {
       local SMA is ship:orbit:semimajoraxis.
       local Ecc is ship:orbit:eccentricity.
       local CurRadiusAtTargetPeriapsis is (SMA * ( (1-ecc^2) / (1+ecc*cos(TrueAnomalyTargetPer))))-body:radius.
+      local FinalMan is "x".
 
       if ship:orbit:semimajoraxis < TargetDestination:orbit:semimajoraxis {
         local InputList is list(time:seconds + TimeTargetPeriapsis, 0, 0, 0).
@@ -56,9 +53,7 @@ Function RendezvousSetup {
         set FinalMan to T_HillUni["ResultFinder"](InputList, "PerApoMatch", NewScoreList, NewRestrictionList).
       }
 
-      D_ManExe["DvCalc"](FinalMan).
-      D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-      D_ManExe["PerformBurn"](EndDv, StartT).
+      T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
 Function MatchOrbit {
@@ -89,9 +84,7 @@ Function MatchOrbit {
       local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
       set FinalMan to T_HillUni["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
     }
-    D_ManExe["DvCalc"](FinalMan).
-    D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-    D_ManExe["PerformBurn"](EndDv, StartT).
+    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   }
 
 
@@ -105,9 +98,7 @@ Function MatchOrbit {
     print "lowering orbit".
     local DvNeeded is T_Other["VisViva"](ship:orbit:periapsis, (ship:orbit:periapsis+2*ship:body:radius+(0.8*TargetDestination:orbit:periapsis))/2).
     local LowerList is list(time:seconds+eta:periapsis, 0, 0, DvNeeded).
-    D_ManExe["DvCalc"](LowerList).
-    D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-    D_ManExe["PerformBurn"](EndDv, StartT).
+    T_ManeuverExecute["ExecuteManeuver"](LowerList).
   }
 
     print "Matching up orbit".
@@ -115,9 +106,7 @@ Function MatchOrbit {
     local NewScoreList is list(TargetDestination).
     local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_radialout_radialin_timeplus_timemin").
     set FinalMan to T_HillUni["ResultFinder"](InputList, "PerPerMatch", NewScoreList, NewRestrictionList).
-    D_ManExe["DvCalc"](FinalMan).
-    D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-    D_ManExe["PerformBurn"](EndDv, StartT).
+    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
 Function FinalApproach {
@@ -132,13 +121,14 @@ Function FinalApproach {
   local TarSMA is (((TarPeriod^2)*ship:body:mu)/(4*constant:pi^2))^(1/3).
 
   local DvNeeded is T_Other["VisViva"](ship:orbit:apoapsis, TarSMA).
-  local AproachList is list(time:seconds+eta:apoapsis, 0, 0, DvNeeded).
-  D_ManExe["DvCalc"](AproachList).
+  local ApproachList is list(time:seconds+eta:apoapsis, 0, 0, DvNeeded).
+  local ApproachNode is node(ApproachList[0], ApproachList[1], ApproachList[2], ApproachList[3]).
+  add ApproachNode.
+  wait 0.
 
   if nextnode:orbit:hasnextpatch {
     if nextnode:orbit:nextpatch:body <> ship:orbit:body{
       until nextnode:orbit:nextpatch:body = ship:orbit:body{
-        remove nextnode.
         set StepsNeeded to StepsNeeded + 1.
 
         set CurPeriod to ship:orbit:period.
@@ -147,14 +137,13 @@ Function FinalApproach {
         set TarSMA to (((TarPeriod^2)*ship:body:mu)/(4*constant:pi^2))^(1/3).
 
         local DvNeeded is T_Other["VisViva"](ship:orbit:apoapsis, TarSMA).
-        set AproachList to list(time:seconds+eta:apoapsis, 0, 0, DvNeeded).
-        D_ManExe["DvCalc"](AproachList).
+        set ApproachList to list(time:seconds+eta:apoapsis, 0, 0, DvNeeded).
       }
     }
   }
 
-  D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-  D_ManExe["PerformBurn"](EndDv, StartT).
+  remove ApproachNode.
+  T_ManeuverExecute["ExecuteManeuver"](ApproachList).
 
   wait 5.
   local TargetTime is "x".
@@ -188,11 +177,19 @@ Function FinalApproach {
 Function MainRelVelKill {
   Parameter TargetDestination.
 
-  T_Steering["SteeringTargetRet"](TargetDestination).
-  local DvNeeded is (ship:velocity:orbit-TargetDestination:velocity:orbit):mag.
-  local CurDv is T_Other["CurrentDvCalc"]().
-  local EndDv is CurDv - DvNeeded.
-  D_ManExe["PerformBurn"](EndDv, 10, 100, true).
+  local VectorNeeded is (TargetDestination:velocity:orbit - ship:velocity:orbit).
+  local NodeList is T_Other["NodeFromVector"](VectorNeeded).
+  T_ManeuverExecute["ExecuteManeuver"](NodeList).
+}
+
+Function GoToTarget {
+  Parameter TargetDestination.
+  Parameter SpeedNeeded.
+
+  local InitialVector is TargetDestination:position - ship:position.
+  local VectorNeeded  is InitialVector:normalized * SpeedNeeded.
+  local NodeList is T_Other["NodeFromVector"](VectorNeeded).
+  T_ManeuverExecute["ExecuteManeuver"](NodeList).
 }
 
 Function VeryFinalApproach {
@@ -203,13 +200,9 @@ Function VeryFinalApproach {
   set warpmode to "rails".
 
   if Distance > 15000 {
-    //print "extra boost needed".
     MainRelVelKill(TargetDestination).
     T_Steering["SteeringTarget"](TargetDestination).
-    local DvNeeded is 100.
-    local CurDv is T_Other["CurrentDvCalc"]().
-    local EndDv is CurDv - DvNeeded.
-    D_ManExe["PerformBurn"](EndDv, 10, 100, true).
+    GoToTarget(TargetDestination, 50).
     T_Steering["SteeringTargetRet"](TargetDestination).
     set warp to 2.
     wait until Distance < 10000.
@@ -221,10 +214,7 @@ Function VeryFinalApproach {
     //print "3000 meters".
     MainRelVelKill(TargetDestination).
     T_Steering["SteeringTarget"](TargetDestination).
-    local DvNeeded is 40.
-    local CurDv is T_Other["CurrentDvCalc"]().
-    local EndDv is CurDv - DvNeeded.
-    D_ManExe["PerformBurn"](EndDv, 10, 100, true).
+    GoToTarget(TargetDestination, 30).
     T_Steering["SteeringTargetRet"](TargetDestination).
     set warp to 1.
     wait until Distance < 1000.
@@ -234,10 +224,7 @@ Function VeryFinalApproach {
 
   MainRelVelKill(TargetDestination).
   T_Steering["SteeringTarget"](TargetDestination).
-  local DvNeeded is 10.
-  local CurDv is T_Other["CurrentDvCalc"]().
-  local EndDv is CurDv - DvNeeded.
-  D_ManExe["PerformBurn"](EndDv, 10, 100, true).
+  GoToTarget(TargetDestination, 10).
   T_Steering["SteeringTargetRet"](TargetDestination).
   wait until Distance < 275.
   MainRelVelKill(TargetDestination).

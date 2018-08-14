@@ -120,9 +120,8 @@ Function InclinationMatcher {
   local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_radialout_radialin_timeplus_timemin").
   local FinalMan is T_HillUni["ResultFinder"](InputList, "Inclination", NewScoreList, NewRestrictionList).
 
-  D_ManExe["DvCalc"](FinalMan).
-  D_ManExe["TimeTillManeuverBurn"](FinalManeuver:eta, DvNeeded).
-  D_ManExe["PerformBurn"](EndDv, StartT).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+
 }
 }
 print "read lib_inclination".
