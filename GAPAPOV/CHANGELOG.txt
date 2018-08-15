@@ -1,3 +1,10 @@
+## 1.2.0 - 2018-08-15
+### Added
+  - lib_readout for a more user friendly interface with readouts
+  - notes.txt list of some planned features and other stuff
+### Edited
+  - Changes all around increasing accuracy of scripts going to and from planets
+
 ## 1.1.1 - 2018-08-14
 ### Edited
   - lib_hillclimb_man_exe now has revamped maneuver node execution.

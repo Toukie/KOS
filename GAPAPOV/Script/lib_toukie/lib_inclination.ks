@@ -89,6 +89,7 @@ Function DeltaVTheta {
 Function InclinationMatcher {
 
   Parameter TargetDestination.
+  // Mun has 0 degrees inclination so an AN DN pos can be found
 
   local ANDNList is AscenDescenFinder(TargetDestination).
   local TrueAnomAN is ANDNList[0].

@@ -253,7 +253,8 @@ Function Improve {
     set CandidateScore to round(CandidateScore, 5).
     set ScoreToBeat to round(ScoreToBeat, 5).
     print "CandidateScore: " + CandidateScore + "                     "at (1,28).
-    print "ScoreToBeat:    " + ScoreToBeat + "                        " at (1,29).
+    print "ScoreToBeat..:    " + ScoreToBeat + "                        " at (1,29).
+    T_ReadOut["CandidateScoreGUI"](CandidateScore, ScoreToBeat).
     if CandidateScore < ScoreToBeat {
       set ScoreToBeat to CandidateScore.
       set BestCandidate to Candidate.

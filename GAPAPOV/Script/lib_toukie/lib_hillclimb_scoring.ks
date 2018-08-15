@@ -185,6 +185,7 @@ Function ScoreMoonTransfer {
   print "PeriapsisPenalty:  " + PeriapsisPenalty + "                  " at(1,21).
   print "InclinationPenalty " + InclinationPenalty + "                " at(1,22).
   print "TotalPenalty:      " + TotalPenalty + "                      " at(1,23).
+  T_ReadOut["AdvScoreReadOutGUI"]("Moon", list(TransferPenalty, PeriapsisPenalty, InclinationPenalty, TotalPenalty)).
   return TotalPenalty.
 }
 
@@ -231,11 +232,13 @@ Function ScoreInterplanetary {
 
   wait 0.
   //clearscreen.
+  local TotalPenalty is (TransferPenalty+SOIexitPenalty+PeriapsisPenalty).
   print "TransferPenalty   " + TransferPenalty + "            " at(1,20).
   print "SOIexitPenalty    " + SOIexitPenalty + "             " at(1,21).
   print "PeriapsisPenalty  " + PeriapsisPenalty + "           " at(1,22).
-  print "Total Penalty     " + (TransferPenalty+SOIexitPenalty+PeriapsisPenalty) + "          " at(1,23).
-  return (TransferPenalty+SOIexitPenalty+PeriapsisPenalty).
+  print "Total Penalty     " + TotalPenalty + "               " at(1,23).
+  T_ReadOut["AdvScoreReadOutGUI"]("Interplanetary", list(TransferPenalty, SOIexitPenalty, PeriapsisPenalty, TotalPenalty)).
+  return TotalPenalty.
 }
 
 Function ScoreFinalCorrection {
@@ -245,6 +248,11 @@ Function ScoreFinalCorrection {
   local TargetBody        is ScoreList[0].
   local TargetPeriapsis   is ScoreList[1].
   local TargetInclination is ScoreList[2].
+  local InclinationPenaltyWeight is 1.
+
+  if ScoreList:length = 4 {
+    set InclinationPenaltyWeight to ScoreList[3].
+  }
 
   if TargetInclination = 0 {
     set TargetInclination to 0.01.
@@ -257,16 +265,17 @@ Function ScoreFinalCorrection {
   if abs(ScoreManeuver:orbit:inclination - TargetInclination) < 15 {
     set InclinationPenalty to 0.
   } else {
-    set InclinationPenalty to round((abs(ScoreManeuver:orbit:inclination - TargetInclination)/TargetInclination), 2).
+    set InclinationPenalty to round((InclinationPenaltyWeight * abs(ScoreManeuver:orbit:inclination - TargetInclination)/TargetInclination), 2).
   }
 
+  local TotalPenalty is (InclinationPenalty + PeriapsisPenalty).
   print "                                       " at(1,10).
   print "InclinationPenalty  " + InclinationPenalty + "             " at(1,11).
   print "PeriapsisPenalty    " + PeriapsisPenalty + "           " at(1,12).
-  print "Total Penalty       " + (InclinationPenalty+PeriapsisPenalty) + "          " at(1,13).
+  print "Total Penalty       " + TotalPenalty + "          " at(1,13).
   //return PeriapsisPenalty.
-  print "Total Penalty       " + (InclinationPenalty+PeriapsisPenalty) + "          " at(1,13).
-  return (InclinationPenalty+PeriapsisPenalty).
+  T_ReadOut["AdvScoreReadOutGUI"]("Improve", list(InclinationPenalty, PeriapsisPenalty, TotalPenalty)).
+  return TotalPenalty.
 }
 
 

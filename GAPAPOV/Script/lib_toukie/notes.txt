@@ -1,10 +1,20 @@
-circularize before calculating phase angles
-
 HUDtext("some text", 5, 2, 30, red, true).
+vecdraw(v(0,0,0), TargetVector, Green, "Label", 1.0, true, 0.2).
 
-GUI showing if not in orbit
-GUI choosing ap pe for circularize, countdown timer if no option was selected
 
-when interplanetary transferring check if accidental moon intercept is before
-or after correction burn.
+Planned Features
 ___________
+
+High Priority:
+angle from retrograde (moon return) is very inaccurate (goes from 10 degrees to 350)
+
+Med Priority:
+changing incl and SMA even when staying in orbit around same planet
+FIRST match Inclination THEN circularize (at start of script)
+
+
+Low priority :
+check if ship direction moves to fast mid burn and if so ABORT
+make sure rendezvous with planets gives error
+Work on warp speeds for different planets
+for boot up procedure make sure each engine is at 100%

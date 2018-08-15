@@ -73,17 +73,15 @@ Function MatchOrbit {
   print "Circularizing".
 
   if ship:orbit:eccentricity > 0.00001 {
+    local InputList is list().
     if ship:orbit:apoapsis > TargetDestination:orbit:periapsis {
-      local InputList is list(time:seconds + eta:periapsis, 0, 0, 0).
-      local NewScoreList is list(TargetDestination).
-      local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
-      set FinalMan to T_HillUni["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
+      set InputList to list(time:seconds + eta:periapsis, 0, 0, 0).
     } else {
-      local InputList is list(time:seconds + eta:apoapsis, 0, 0, 0).
-      local NewScoreList is list(TargetDestination).
-      local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
-      set FinalMan to T_HillUni["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
+      set InputList to list(time:seconds + eta:apoapsis, 0, 0, 0).
     }
+    local NewScoreList is list(TargetDestination).
+    local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
+    set FinalMan to T_HillUni["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
     T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   }
 

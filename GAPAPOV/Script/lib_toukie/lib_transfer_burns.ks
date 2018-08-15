@@ -148,52 +148,77 @@ Function MoonPostEncounterBurn {
 
   print "post correcting".
 
-  InclinationMatcher2(TargetInclination).
-
   // NOTE following piece of code is not used but might still be handy for reference
   if periapsis < 30000 {
     local NewList is list(time:seconds + 30, 0, 0, 0).
     local NewScoreList is list(30000).
-    local NewRestrictionList is list(
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde"
-      ).
+    local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin_prograde_retrograde").
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
     T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   } else {
     print "periapsis is looking good".
+  }
+
+  wait 1.
+  print "incl " + abs(ship:orbit:inclination - TargetInclination).
+  if abs(ship:orbit:inclination - TargetInclination) < 10 {
+    local NewList is list(time:seconds + 30, 0, 0, 0).
+    local NewScoreList is list(TargetInclination).
+    local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("prograde_retrograde").
+    local FinalMan is T_HillUni["ResultFinder"](NewList, "Inclination", NewScoreList, NewRestrictionList).
+    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+  } else {
+    print "inclination looking G.O.O.D.".
   }
 }
 
 Function InclinationMatcher2 {
   Parameter TargetInclination.
 
-  if abs(ship:orbit:inclination - TargetInclination) > 5 {
-    local NewList is list(time:seconds + 30, 0, 0, 0).
+  local TrueAnomAN is 360 - ship:orbit:argumentofperiapsis.
+  local TrueAnomDN is TrueAnomAN + 180.
+
+  if TrueAnomAN < 0 {
+    set TrueAnomAN to TrueAnomAN + 360.
+  }
+
+  if TrueAnomDN > 360 {
+    set TrueAnomDN to TrueAnomDN - 360.
+  }
+
+  print TrueAnomAN.
+  print TrueAnomDN.
+
+  local TimeNeeded is "x".
+  local TimeAN is T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomAN).
+  local TimeDN is T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomDN).
+  local ThetaChange is abs(ship:orbit:inclination - TargetInclination).
+
+  local ANDv is T_Inclination["DeltaVTheta"](TrueAnomAN, ThetaChange).
+  local DNDv is T_Inclination["DeltaVTheta"](TrueAnomDN, ThetaChange).
+
+  local DvNeeded is min(ANDv, DNDv).
+
+  if ANDv < DNDv {
+    set TimeNeeded to TimeAN.
+    set DvNeeded to -1*DvNeeded.
+  } else {
+    set TimeNeeded to TimeDN.
+  }
+
+  if abs(ship:orbit:inclination - TargetInclination) > 0.1 {
+    local NewList is list(time:seconds + TimeNeeded, 0, DvNeeded, 0).
     local NewScoreList is list(TargetInclination).
+
     local NewRestrictionList is "x".
     if abs(ship:orbit:inclination - TargetInclination) > 90 {
       print "over 90 deg diff".
-      set NewRestrictionList to list(
-        "timeplus_prograde_retrograde",
-        "timeplus_prograde_retrograde",
-        "timeplus_prograde_retrograde",
-        "timeplus_prograde_retrograde",
-        "timeplus_prograde_retrograde"
-        ).
+      set NewRestrictionList to T_HillUni["IndexFiveFolderder"]("timeplus_prograde_retrograde").
     } else {
       print "under 90 deg diff".
-      set NewRestrictionList to list(
-        "timeplus_timemin_prograde_retrograde_radialin_radialout",
-        "timeplus_timemin_prograde_retrograde_radialin_radialout",
-        "timeplus_timemin_prograde_retrograde_radialin_radialout",
-        "timeplus_timemin_prograde_retrograde_radialin_radialout",
-        "timeplus_timemin_prograde_retrograde_radialin_radialout"
-        ).
+      set NewRestrictionList to T_HillUni["IndexFiveFolderder"]("timeplus_timemin_prograde_retrograde_radialin_radialout").
     }
+
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Inclination", NewScoreList, NewRestrictionList).
     T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   }

@@ -47,39 +47,15 @@ Function InterplanetaryTransfer {
   if ship:orbit:hasnextpatch = true {
     if ship:orbit:nextpatch:hasnextpatch = true {
       if ship:orbit:nextpatch:nextpatch:body = TargetDestination {
-        print "we've got an accidental moon encounter!".
-        local TimeTillMoonEncounter is time:seconds + eta:transition - 2.
-        warpto(TimeTillMoonEncounter).
-        wait until time:seconds > TimeTillMoonEncounter + 4.
-        // make sure we dont crash into the surface
-        if ship:orbit:periapsis < 30000 {
-          local NewList is list(time:seconds + 30, 0, 0, 0).
-          local NewScoreList is list(30000).
-          local NewRestrictionList is list(
-            "realnormal_antinormal_timeplus_timemin",
-            "realnormal_antinormal_timeplus_timemin",
-            "realnormal_antinormal_timeplus_timemin",
-            "realnormal_antinormal_timeplus_timemin",
-            "realnormal_antinormal_timeplus_timemin"
-            ).
-          local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-          T_ManeuverExecute["ExecuteManeuver"](FinalMan).
-        }
-
-        if NoAccidentalIntercept = true {
-
-          local TimeTillMoonExit is time:seconds + eta:transition - 2.
-          warpto(TimeTillMoonExit).
-          wait until time:seconds > TimeTillMoonExit + 4.
-
-          local MinHeight is 30000.
-          if ship:orbit:body:atm:exists {
-            set MinHeight to ship:orbit:body:atm:height*1.5.
-          }
-
-          if ship:orbit:periapsis < MinHeight {
+        if eta:transition < eta:periapsis {
+          print "we've got an accidental moon encounter!".
+          local TimeTillMoonEncounter is time:seconds + eta:transition - 2.
+          warpto(TimeTillMoonEncounter).
+          wait until time:seconds > TimeTillMoonEncounter + 4.
+          // make sure we dont crash into the surface
+          if ship:orbit:periapsis < 30000 {
             local NewList is list(time:seconds + 30, 0, 0, 0).
-            local NewScoreList is list(MinHeight).
+            local NewScoreList is list(30000).
             local NewRestrictionList is list(
               "realnormal_antinormal_timeplus_timemin",
               "realnormal_antinormal_timeplus_timemin",
@@ -90,10 +66,36 @@ Function InterplanetaryTransfer {
             local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
             T_ManeuverExecute["ExecuteManeuver"](FinalMan).
           }
-        }
 
-        if NoAccidentalIntercept = false {
-          T_TransferBurn["MoonTransfer"](TargetDestination, TargetPeriapsis, TargetInclination, true).
+          if NoAccidentalIntercept = true {
+
+            local TimeTillMoonExit is time:seconds + eta:transition - 2.
+            warpto(TimeTillMoonExit).
+            wait until time:seconds > TimeTillMoonExit + 4.
+
+            local MinHeight is 30000.
+            if ship:orbit:body:atm:exists {
+              set MinHeight to ship:orbit:body:atm:height*1.5.
+            }
+
+            if ship:orbit:periapsis < MinHeight {
+              local NewList is list(time:seconds + 30, 0, 0, 0).
+              local NewScoreList is list(MinHeight).
+              local NewRestrictionList is list(
+                "realnormal_antinormal_timeplus_timemin",
+                "realnormal_antinormal_timeplus_timemin",
+                "realnormal_antinormal_timeplus_timemin",
+                "realnormal_antinormal_timeplus_timemin",
+                "realnormal_antinormal_timeplus_timemin"
+                ).
+              local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
+              T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+            }
+          }
+
+          if NoAccidentalIntercept = false {
+            T_TransferBurn["MoonTransfer"](TargetDestination, TargetPeriapsis, TargetInclination, true).
+          }
         }
       }
     }
@@ -112,6 +114,8 @@ Function InterplanetaryTransfer {
 
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+
+  T_TransferBurn["InclinationMatcher2"](TargetInclination).
 
   if PreciseCirc = true {
 
@@ -213,7 +217,20 @@ Function MoonTransfer {
     lock throttle to 0.
   }
 
-  T_TransferBurn["MoonPostEncounterBurn"](TargetPeriapsis, TargetInclination).
+  print "PRE INCL CORRECTION".
+  local NewList is list(time:seconds + 30, 0, 0, 0).
+  local NewScoreList is list(TargetDestination, TargetPeriapsis, TargetInclination).
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("prograde_retrograde").
+  if abs(ship:orbit:inclination - TargetInclination) > 15 {
+    set NewScoreList to list(TargetDestination, TargetPeriapsis, TargetInclination, 10).
+    set NewRestrictionList to T_HillUni["IndexFiveFolderder"]("nothing").
+    print "no restrictions!".
+  }
+  local FinalMan is T_HillUni["ResultFinder"](NewList, "FinalCorrection", NewScoreList, NewRestrictionList).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+
+  //T_TransferBurn["MoonPostEncounterBurn"](TargetPeriapsis, TargetInclination).
+  print "POST INCL CORRECTION".
 
   if eta:periapsis > 30 {
     local NewList is list(time:seconds + eta:periapsis, 0, 0, 0).
@@ -247,6 +264,9 @@ Function MoonTransfer {
   }
 
   // we have circularized by now so nows the time to match periapsis and apoapsis to the target
+  // but first match inclination
+
+  T_TransferBurn["InclinationMatcher2"](TargetInclination).
 
   print "matching per and apo".
   local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
@@ -292,7 +312,7 @@ Function MoonToReferencePlanet {
   set kuniverse:timewarp:warp to (T_Warp["GetAllowedTimeWarp"]()).
   local CurrentEjectionAngle is 100.
 
-  until CurrentEjectionAngle > 355 or CurrentEjectionAngle < 5 {
+  until CurrentEjectionAngle > 350 or CurrentEjectionAngle < 10 {
     if TargetPlanet:orbit:semimajoraxis > StartingBody:orbit:semimajoraxis {
       if vang(-body:position, PosToNegAngle) < vang(-body:position, NegToPosAngle) {
         set CurrentEjectionAngle to 360 - vang(-body:position , body:orbit:velocity:orbit).
@@ -315,6 +335,8 @@ Function MoonToReferencePlanet {
       set CurrentEjectionAngle to InbetweenEjectionAngle.
       print "Angle from retrograde: " + CurrentEjectionAngle at (1,4).
     }
+
+    T_ReadOut["PeriapsisAngleGUI"](CurrentEjectionAngle, 0).
   }
 
   local warpnumber is 1.
@@ -339,6 +361,7 @@ Function MoonToReferencePlanet {
   local Warptime is time:seconds + eta:transition.
   warpto(Warptime).
   wait until time:seconds > Warptime + 5.
+  print "out of moon SOI".
 
   if ship:orbit:periapsis < CriticalHeight {
     print "Correction needed!".

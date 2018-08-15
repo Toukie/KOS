@@ -3,7 +3,9 @@
 {
 
 global T_GUI is lexicon(
-  "CompleteParameterGUI", CompleteParameterGUI@
+  "CompleteParameterGUI", CompleteParameterGUI@,
+  "StatusCheck", StatusCheck@,
+  "CircGUI", CircGUI@
   ).
 
 local gui is gui(400).
@@ -285,7 +287,10 @@ Function CompleteParameterGUI {
   until FinishProcedure = true {
     wait 1.
   }
-  clearguis().
+  gui:hide().
+  gui1:hide().
+  gui2:hide().
+  // clearguis().
   if RendWindows = false {
     set TargetBody to GUIEmptyBodyList[0].
     set TargetPeriapsis to textbox2:text:tonumber().
@@ -296,6 +301,57 @@ Function CompleteParameterGUI {
     set ParameterList to list(TargetVessel).
   }
   return ParameterList.
+}
+
+Function StatusCheck {
+  local gui is gui(400).
+  local StatusCheckDone is false.
+
+  if ship:status <> "ORBITING" {
+    local label1 is gui:addlabel("<b><size=20>Not in (a stable) orbit!</size></b>").
+    set label1:style:align to "center".
+    local label2 is gui:addlabel("<b><size=20>Press the button if you're in a stable orbit.</size></b>").
+    set label2:style:align to "center".
+    gui:addlabel("<size=10> </size>").
+    local OrbitButton is gui:addbutton("In a stable orbit").
+    gui:show().
+    set OrbitButton:onclick to {if ship:status = "ORBITING" {set StatusCheckDone to true.}}.
+  } else {
+    set StatusCheckDone to true.
+  }
+
+  wait until StatusCheckDone = true.
+  gui:dispose().
+}
+
+Function CircGUI {
+  local gui is gui(400).
+  local FinalOption is "x".
+  local label1 is gui:addlabel("<b><size=15>Circularization needed before continuing, choose where to circularize. If no option is picked within 20 seconds the script will choose where to circularize.</size></b>").
+  set label1:style:align to "center".
+  local PerButton is gui:addbutton("<size=15>Circularize at the periapsis</size>").
+  local ApoButton is gui:addbutton("<size=15>Circularize at the apoapsis</size>").
+
+  set gui:y to 100.
+  gui:show().
+  set PerButton:onclick to {set FinalOption to "periapsis".}.
+  set ApoButton:onclick to {set FinalOption to "apoapsis".}.
+
+  local StartTime is time:seconds + 20.
+
+  until FinalOption <> "x" {
+    if time:seconds > StartTime {
+      local RandomNumber is random().
+      if RandomNumber < 0.5 {
+        set FinalOption to "periapsis".
+      } else {
+        set FinalOption to "apoapsis".
+      }
+    }
+    wait 1.
+  }
+  gui:dispose().
+  return FinalOption.
 }
 
 }

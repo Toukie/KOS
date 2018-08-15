@@ -41,6 +41,7 @@ Function PerformBurn {
   Parameter ThrustLimit is 100.
 
   local StopBurn is false.
+  sas off.
 
   T_Steering["SteeringManeuver"]().
 
@@ -107,14 +108,14 @@ Function PerformBurn {
 
     if MaxThrust > 0 {
       local CurThrust is throttle * MaxThrust.
-      if CurThrust < 0.001 {
+      if CurThrust < 0.1 {
         lock throttle to 0.
         HUDtext("Throttle near 0, ending burn.", 5, 2, 30, green, false).
         set StopBurn to true.
       }
     }
 
-    if nextnode:deltav:mag < 0.002 {
+    if nextnode:deltav:mag < 0.01 {
         lock throttle to 0.
         HUDtext("Dv left very small, ending burn.", 5, 2, 30, green, false).
         wait 3.

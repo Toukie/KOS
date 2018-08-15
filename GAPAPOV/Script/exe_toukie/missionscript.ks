@@ -3,6 +3,7 @@ set kuniverse:timewarp:warp to 0.
 clearvecdraws().
 clearguis().
 set config:ipu to 200.
+core:doaction("Close Terminal", true).
 
 if true=true  {
  T_Boot["CopyAndRunFile"]("lib_closest_approach", "0:/lib_toukie/").
@@ -15,6 +16,7 @@ if true=true  {
  T_Boot["CopyAndRunFile"]("lib_inclination", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_other", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_phase_angle", "0:/lib_toukie/").
+ T_Boot["CopyAndRunFile"]("lib_readout", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_rendezvous", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_stage", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_steering", "0:/lib_toukie/").
@@ -31,8 +33,6 @@ unlock throttle.
 
 set terminal:width  to 90.
 set terminal:height to 100.
-
-core:doaction("Open Terminal", true).
 
 clearscreen.
 

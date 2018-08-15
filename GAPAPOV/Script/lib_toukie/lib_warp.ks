@@ -32,7 +32,6 @@ Function WarpToPhaseAngle {
 
   local CurrentPhaseAngle is T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
   local TargetPhaseAngle  is T_PhaseAngle["PhaseAngleCalculation"](TargetPlanet, StartingBody, ReferenceBody).
-  print TargetPhaseAngle at(1,6).
 
   if SlowWarp = true {
     set kuniverse:timewarp:warp to (GetAllowedTimeWarp()-1).
@@ -42,7 +41,7 @@ Function WarpToPhaseAngle {
   }
   until T_Other["ish"](CurrentPhaseAngle, TargetPhaseAngle, ishyness) {
     set CurrentPhaseAngle to T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
-    print CurrentPhaseAngle at (1,5).
+    T_ReadOut["PhaseAngleGUI"](CurrentPhaseAngle, TargetPhaseAngle).
   }
 
   local WarpNumber  is 2.
@@ -90,6 +89,7 @@ Function WarpToEjectionAngle {
     } else {
       set CurrentEjectionAngle to vang(-body:position , body:orbit:velocity:orbit).
     }
+    EjectionAngleGUI(CurrentEjectionAngle, EjectionAng, "pro").
     print "Angle from prograde:   " + CurrentEjectionAngle at (1,4).
   }
 
@@ -99,6 +99,7 @@ Function WarpToEjectionAngle {
     } else {
       set CurrentEjectionAngle to vang(-body:position , -body:orbit:velocity:orbit).
     }
+    EjectionAngleGUI(CurrentEjectionAngle, EjectionAng, "retro").
     print "Angle from retrograde: " + CurrentEjectionAngle at (1,4).
   }
  }

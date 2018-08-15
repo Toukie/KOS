@@ -157,6 +157,7 @@ Function ClosestApproachRefiner {
   print "km:    " + round(ClosestApproach/1000) + "                 " at(1,11).
   print "Mm:    " + round(ClosestApproach/1000000) + "              " at(1,12).
   print "Gm:    " + round(ClosestApproach/1000000000) + "           " at(1,13).
+  T_ReadOut["ClosestApproachGUI"](ClosestApproach).
   return ClosestApproach.
 }
 
