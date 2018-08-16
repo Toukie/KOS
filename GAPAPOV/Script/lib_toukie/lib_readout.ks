@@ -5,7 +5,7 @@ global T_ReadOut is lexicon(
   "ClosestApproachGUI", ClosestApproachGUI@,
   "CandidateScoreGUI", CandidateScoreGUI@,
   "AdvScoreReadOutGUI", AdvScoreReadOutGUI@,
-  "PeriapsisAngleGUI", PeriapsisAngleGUI@,
+  "RetrogradeAngleGUI", RetrogradeAngleGUI@,
   "QuitAllGUI", QuitAllGUI@
   ).
 
@@ -49,10 +49,10 @@ local Ca4 is ReadOutGUI:addtextfield("Loading...").
 set Ca4:enabled to false.
 local CaBreaker is ReadOutGUI:addlabel("<size=20>__________________________</size>").
 
-local Pe1 is ReadOutGUI:addlabel("<size=15>Current angle from periapsis: </size>").
+local Pe1 is ReadOutGUI:addlabel("<size=15>Current angle from planet's retrograde: </size>").
 local Pe2 is ReadOutGUI:addtextfield("Loading...").
 set Pe2:enabled to false.
-local Pe3 is ReadOutGUI:addlabel("<size=15>Target angle from periapsis:  </size>").
+local Pe3 is ReadOutGUI:addlabel("<size=15>Target angle from planet's retrograde:  </size>").
 local Pe4 is ReadOutGUI:addtextfield("Loading...").
 set Pe4:enabled to false.
 local PeBreaker is ReadOutGUI:addlabel("<size=20>__________________________</size>").
@@ -278,16 +278,16 @@ Function QuitAdvScoreReadOutGUI {
   set AdvScoreReadOut to false.
 }
 
-Function PeriapsisAngleGUI {
-  Parameter CurrentPeriapsisAngle.
-  Parameter TargetPeriapsisAngle.
+Function RetrogradeAngleGUI {
+  Parameter CurrentRetrogradeAngle.
+  Parameter TargetRetrogradeAngle.
 
-  set Pe2:text to (round(CurrentPeriapsisAngle,2)):tostring.
-  set Pe4:text to (round(TargetPeriapsisAngle, 2)):tostring.
+  set Pe2:text to (round(CurrentRetrogradeAngle,2)):tostring.
+  set Pe4:text to (round(TargetRetrogradeAngle, 2)):tostring.
   set PeriAngleReadout to true.
 }
 
-Function QuitPeriapsisAngleGUI {
+Function QuitRetrogradeAngleGUI {
   Pe1:hide().
   Pe2:hide().
   Pe3:hide().
@@ -302,5 +302,5 @@ Function QuitAllGUI {
   QuitClosestApproachGUI().
   QuitCandidateScoreGUI().
   QuitAdvScoreReadOutGUI().
-  QuitPeriapsisAngleGUI().
+  QuitRetrogradeAngleGUI().
 }

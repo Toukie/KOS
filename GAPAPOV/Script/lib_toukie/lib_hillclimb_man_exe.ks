@@ -52,6 +52,9 @@ Function PerformBurn {
   warpto(StartT-10).
 
   lock steering to nextnode:deltav.
+  wait until vang(ship:facing:vector, nextnode:deltav) < 0.1.
+  local ShipFacingVec is ship:facing:vector.
+  local lock ManVec to nextnode:deltav:normalized.
 
   wait until time:seconds > StartT.
 
@@ -121,6 +124,12 @@ Function PerformBurn {
         wait 3.
         set StopBurn to true.
       }
+
+    if vdot(ShipFacingVec, ManVec) < 0 {
+      lock throttle to 0.
+      HUDtext("Dv marker to far from starting position.", 5, 2, 30, green, false).
+      wait 3.
+      set StopBurn to true.    }
 
     if OldDeltaVAverage < NewDeltaVAverage {
       lock throttle to 0.

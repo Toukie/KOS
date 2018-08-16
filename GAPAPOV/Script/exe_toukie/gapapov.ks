@@ -22,3 +22,4 @@ T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
 T_GAPAPOV["GAPAPOV"](GivenParameterList).
 clearguis().
+clearvecdraws().

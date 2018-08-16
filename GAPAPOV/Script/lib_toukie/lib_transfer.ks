@@ -159,10 +159,12 @@ Function MoonTransfer {
       T_Inclination["InclinationMatcher"](TargetDestination).
     }
 
+    // only ever true for Gilly
     if TargetDestination:orbit:eccentricity > 0.1 {
       if not (TargetDestination:orbit:trueanomaly > 220 and TargetDestination:orbit:trueanomaly < 270) {
         set kuniverse:timewarp:warp to T_Warp["GetAllowedTimeWarp"]().
         wait until TargetDestination:orbit:trueanomaly > 220 and TargetDestination:orbit:trueanomaly < 270.
+        set kuniverse:timewarp:warp to 0.
       }
       set kuniverse:timewarp:warp to 0.
     }
@@ -306,37 +308,13 @@ Function MoonToReferencePlanet {
     }
   }
 
-  local lock PosToNegAngle to vcrs(vcrs(ship:velocity:orbit, body:position),ship:body:orbit:velocity:orbit).
-  local lock NegToPosAngle to vcrs(ship:body:orbit:velocity:orbit, vcrs(ship:velocity:orbit, body:position)).
-
   set kuniverse:timewarp:warp to (T_Warp["GetAllowedTimeWarp"]()).
-  local CurrentEjectionAngle is 100.
+  local AngleFromPeriapsis is 100.
 
-  until CurrentEjectionAngle > 350 or CurrentEjectionAngle < 10 {
-    if TargetPlanet:orbit:semimajoraxis > StartingBody:orbit:semimajoraxis {
-      if vang(-body:position, PosToNegAngle) < vang(-body:position, NegToPosAngle) {
-        set CurrentEjectionAngle to 360 - vang(-body:position , body:orbit:velocity:orbit).
-      } else {
-        set CurrentEjectionAngle to vang(-body:position , body:orbit:velocity:orbit).
-      }
-      print "Angle from retrograde:   " + CurrentEjectionAngle at (1,4).
-    }
-
-    if TargetPlanet:orbit:semimajoraxis < StartingBody:orbit:semimajoraxis {
-      if vang(-body:position, NegToPosAngle) < vang(-body:position, PosToNegAngle) {
-        set CurrentEjectionAngle to 360 - vang(-body:position , -body:orbit:velocity:orbit).
-      } else {
-        set CurrentEjectionAngle to vang(-body:position , -body:orbit:velocity:orbit).
-      }
-      local InbetweenEjectionAngle is (CurrentEjectionAngle + 180).
-      if InbetweenEjectionAngle > 360 {
-        set InbetweenEjectionAngle to InbetweenEjectionAngle - 360.
-      }
-      set CurrentEjectionAngle to InbetweenEjectionAngle.
-      print "Angle from retrograde: " + CurrentEjectionAngle at (1,4).
-    }
-
-    T_ReadOut["PeriapsisAngleGUI"](CurrentEjectionAngle, 0).
+  until AngleFromPeriapsis > 350 or AngleFromPeriapsis < 10 {
+    set AngleFromPeriapsis to vang(body:orbit:velocity:orbit, ship:position - body:position).
+    wait 0.
+    T_ReadOut["RetrogradeAngleGUI"](AngleFromPeriapsis, 0).
   }
 
   local warpnumber is 1.
@@ -367,15 +345,23 @@ Function MoonToReferencePlanet {
     print "Correction needed!".
     local NewList is list(time:seconds + 30, 0, 0, 0).
     local NewScoreList is list(CriticalHeight).
-    local NewRestrictionList is list(
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde_radialin_radialout",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde",
-      "realnormal_antinormal_timeplus_timemin_prograde_retrograde"
-      ).
+    local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin_prograde_retrograde_radialin_radialout").
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
     T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+  }
+
+  // circularize at the rough periapsis
+  local NewList is list(time:seconds + eta:periapsis, 0, 0, 0).
+  local NewScoreList is list().
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("nothing").
+  local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+
+// match inclination
+  if TargetInclination = 3.1416 {
+    wait 0.
+  } else {
+    T_TransferBurn["InclinationMatcher2"](TargetInclination).
   }
 
   local TargetSMA is (TargetPeriapsis + ship:orbit:periapsis)/2 + ship:body:radius.
@@ -393,33 +379,9 @@ Function MoonToReferencePlanet {
     set ApoOrPerETA to eta:apoapsis.
   }
 
-  local InclinWarp is time:seconds + ApoOrPerETA.
-  warpto(InclinWarp).
-  wait until time:seconds > InclinWarp.
-
-  if TargetInclination = 3.1416 {
-    wait 0.
-  } else {
-    T_TransferBurn["InclinationMatcher2"](TargetInclination).
-  }
-
-  if ManVal1 < ManVal2 {
-    set ApoOrPerETA to eta:periapsis.
-  } else {
-    set ApoOrPerETA to eta:apoapsis.
-  }
-
   local NewList is list(time:seconds + ApoOrPerETA, 0, 0, 0).
-  local NewScoreList is list(1).
-
-  local NewRestrictionList is list(
-    "realnormal_antinormal_timeplus",
-    "realnormal_antinormal_timeplus",
-    "realnormal_antinormal_timeplus",
-    "realnormal_antinormal_timeplus",
-    "realnormal_antinormal_timeplus"
-    ).
-
+  local NewScoreList is list().
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus").
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 

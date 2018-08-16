@@ -11,6 +11,8 @@ global T_GUI is lexicon(
 local gui is gui(400).
 local gui1 is gui(300).
 local gui2 is gui(300).
+local gui3 is gui(350).
+local gui4 is gui(300).
 
 local textbox1 is "x".
 local textbox2 is "x".
@@ -63,7 +65,7 @@ Function GUISetup1 {
 
   gui:addlabel("<size=15>    </size>").
   gui:addlabel("<size=15>Periapsis at the target destination:</size>").
-  set textbox2 to gui:addtextfield("70000").
+  set textbox2 to gui:addtextfield("750000").
   gui:addlabel("<size=15>    </size>").
   gui:addlabel("<size=15>Inclination at the target destination:</size>").
   set textbox3 to gui:addtextfield("0").
@@ -81,6 +83,9 @@ Function CheckOptions {
 
   clearscreen.
   gui2:dispose().
+  gui1:hide().
+  gui3:hide().
+  gui4:hide().
   set gui2 to gui(400).
   local label3 is gui2:addlabel("<size=15>Errors:</size>").
   gui2:addlabel("<size=15>    </size>").
@@ -106,19 +111,67 @@ Function CheckOptions {
 }
 
 Function RendOptions {
-  local gui4 is gui(350).
-  set gui4:addlabel("<b><size=15>pick a vessel to perform a rendezvous with:</size> </b>"):style:align to "center".
+
+  gui3:dispose().
+  set gui3 to gui(350).
+  set gui3:addlabel("<b><size=15>Pick a vessel to perform a rendezvous with:</size> </b>"):style:align to "center".
   if hastarget = true {
-    set RendText to gui4:addtextfield(target:name).
+    local ShipList is list().
+    local Continue is false.
+    list targets in ShipList.
+
+    for Shp in ShipList {
+      if Shp:name = target:name {
+        set RendText to gui3:addtextfield(target:name).
+      }
+    }
+    if RendText = "x" {
+      set RendText to gui3:addtextfield("Eagle").
+    }
+
   } else {
-    set RendText to gui4:addtextfield("Eagle").
+    set RendText to gui3:addtextfield("Eagle").
   }
-  local RendConf is gui4:addbutton("confirm").
+  local RendAp is gui3:addbutton("apply").
+  local RendCa is gui3:addbutton("cancel").
+  set RendCa:onclick to {gui3:dispose().}.
+  set RendAp:onclick to RendApply@.
+  gui3:show().
+
+}
+
+Function RendApply {
+  gui4:dispose().
+  gui1:hide().
+  gui2:hide().
+  set gui4 to gui(300).
   gui4:show().
+
+  local ShipName is RendText:text.
+
+  local ShipList is list().
+  local Continue is false.
+  list targets in ShipList.
+
+  for Shp in ShipList {
+    if Shp:name = ShipName {
+      set Continue to true.
+    }
+  }
+
+  if Continue = false {
+    HUDtext("Enter a valid vessel name", 5, 2, 30, red, true).
+    gui4:dispose().
+  }
+
+  local RendConf is gui4:addbutton("confirm").
+  local RendCanc is gui4:addbutton("cancel").
   set RendConf:onclick to RendOptionsConf@.
+  set RendCanc:onclick to {gui4:dispose(). gui3:hide().}.
 }
 
 Function RendOptionsConf {
+  gui3:dispose().
   set RendWindows to true.
   set FinishProcedure to true.
 }

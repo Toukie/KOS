@@ -50,9 +50,18 @@ Function GAPAPOV {
     set CurIsPlanet to false.
   }
 
-  if ship:body = TargetBody {
+  if ship:body = TargetBody and TargetVessel = "x" {
     print "already in orbit around " + ship:body:name.
   }
+
+  if TargetVessel <> "x" {
+    clearscreen.
+    HUDtext("Rendezvous is go", 5, 2, 30, red, true).
+    T_Rendezvous["CompleteRendezvous"](TargetVessel).
+    HUDtext("Rendezvous cleared, docking...", 5, 2, 30, red, true).
+    T_Docking["Dock"](TargetVessel).
+  }
+
 
   if ship:body = TargetBody {
     wait 0.
@@ -97,13 +106,6 @@ Function GAPAPOV {
     }
   }
 
-  if TargetVessel <> "x" {
-    clearscreen.
-    HUDtext("Rendezvous is go", 5, 2, 30, red, true).
-    T_Rendezvous["CompleteRendezvous"](TargetVessel).
-    HUDtext("Rendezvous cleared, docking...", 5, 2, 30, red, true).
-    T_Docking["Dock"](TargetVessel).
-  }
 
   clearscreen.
   print "all done".

@@ -3,7 +3,7 @@ set kuniverse:timewarp:warp to 0.
 clearvecdraws().
 clearguis().
 set config:ipu to 200.
-core:doaction("Close Terminal", true).
+core:doaction("Open Terminal", true).
 
 if true=true  {
  T_Boot["CopyAndRunFile"]("lib_closest_approach", "0:/lib_toukie/").
@@ -31,8 +31,11 @@ T_Other["RemoveAllNodes"]().
 lock throttle to 0.
 unlock throttle.
 
-set terminal:width  to 90.
-set terminal:height to 100.
+local EngList is list().
+list Engines in EngList.
+for Eng in EngList {
+  set Eng:thrustlimit to 100.
+}
 
 clearscreen.
 
