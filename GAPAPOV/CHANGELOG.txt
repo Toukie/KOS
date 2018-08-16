@@ -1,3 +1,10 @@
+## 1.2.1 - 2018-08-16
+### Edited
+  - lib_GUI for a safer main GUI
+  - lib_transfer replaced 'angle from periapsis' calculator with a way simpler and preciser version
+  - lib_man_exe new variable which checks when to stop burning
+  - missionscript new safety measure which sets all engines to 100% at the start
+
 ## 1.2.0 - 2018-08-15
 ### Added
   - lib_readout for a more user friendly interface with readouts
