@@ -10,7 +10,8 @@ global T_TransferBurn is lexicon(
   "MoonInsertionBurn", MoonInsertionBurn@,
   "MoonCorrectionBurn", MoonCorrectionBurn@,
   "MoonPostEncounterBurn", MoonPostEncounterBurn@,
-  "InclinationMatcher2", InclinationMatcher2@
+  "InclinationMatcher2", InclinationMatcher2@,
+  "MoonToMoonInsertionBurn", MoonToMoonInsertionBurn@
   ).
 ///
 /// INTERPLANETARY
@@ -28,15 +29,7 @@ Function InsertionBurn {
   local NewList is list(time:seconds + 300, 0, 0, InsertionBurnDv).
 
   local NewScoreList is list(TargetDestination, TargetPeriapsis).
-
-  local NewRestrictionList is list(
-    "none",
-    "none",
-    "none",
-    "none",
-    "none"
-    ).
-
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("none").
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Interplanetary", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
@@ -61,17 +54,8 @@ Function CorrectionBurn {
   Parameter TargetPeriapsis.
 
   local NewList is list(time:seconds + 300, 0, 0, 0).
-
   local NewScoreList is list(TargetDestination, TargetPeriapsis).
-
-  local NewRestrictionList is list(
-    "none",
-    "none",
-    "none",
-    "none",
-    "none"
-    ).
-
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("none").
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Interplanetary", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
@@ -84,15 +68,7 @@ Function FinalCorrectionBurn {
   local NewList is list(time:seconds + 300, 0, 0, 0).
 
   local NewScoreList is list(TargetDestination, TargetPeriapsis, TargetInclination).
-
-  local NewRestrictionList is list(
-    "prograde_retrograde",
-    "prograde_retrograde",
-    "prograde_retrograde",
-    "prograde_retrograde",
-    "prograde_retrograde"
-    ).
-
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("prograde_retrograde").
   local FinalMan is T_HillUni["ResultFinder"](NewList, "FinalCorrection", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
@@ -130,14 +106,7 @@ Function MoonCorrectionBurn {
 
   local NewList is list(time:seconds + 180, 0, 0, 0).
   local NewScoreList is list(TargetDestination, TargetPeriapsis, TargetInclination).
-  local NewRestrictionList is list(
-    "none",
-    "none",
-    "none",
-    "none",
-    "none"
-    ).
-
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("none").
   local FinalMan is T_HillUni["ResultFinder"](NewList, "MoonTransfer", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
@@ -223,6 +192,7 @@ Function InclinationMatcher2 {
     T_ManeuverExecute["ExecuteManeuver"](FinalMan).
   }
 }
+
 }
 
 print "read lib_transfer_burns".

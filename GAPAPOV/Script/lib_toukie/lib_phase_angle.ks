@@ -40,7 +40,7 @@ Function CurrentPhaseAngleFinder {
 
   local CurrentPhaseAngle is vang(TargetPlanet:position - ReferenceBody:position, StartingBody:position - ReferenceBody:position).
   local vcrsCurrentPhaseAngle is vcrs(TargetPlanet:position - ReferenceBody:position, StartingBody:position - ReferenceBody:position).
-  if vdot(v(1,1,1), vcrsCurrentPhaseAngle) <= 0 {
+  if vdot(v(0,1,0), vcrsCurrentPhaseAngle) <= 0 {
     set CurrentPhaseAngle to 360 - CurrentPhaseAngle.
   }
 
@@ -62,14 +62,13 @@ Function GetGrandparentBody {
 Function EjectionAngleVelocityCalculation {
 
   parameter TargetDestination.
-
-  local GrandparentBody is GetGrandparentBody().
+  parameter ReferenceBody is Sun.
 
   local ShipParentSMA is ship:body:orbit:semimajoraxis.
   local ShipSMA is ship:orbit:semimajoraxis.
   local TargetDesSMA is TargetDestination:orbit:semimajoraxis.
 
-  local SOIExitVel  is sqrt(GrandparentBody:mu/ShipParentSMA) * (sqrt((2*TargetDesSMA)/(ShipParentSMA+TargetDesSMA))-1).
+  local SOIExitVel  is sqrt(ReferenceBody:mu/ShipParentSMA) * (sqrt((2*TargetDesSMA)/(ShipParentSMA+TargetDesSMA))-1).
   local EjectionVel is sqrt(SOIExitVel^2 + (2*ship:body:mu)/(ship:orbit:periapsis+ship:body:radius)).
 
   local firstE is ((EjectionVel^2)/2) - (ship:body:mu/ShipSMA).

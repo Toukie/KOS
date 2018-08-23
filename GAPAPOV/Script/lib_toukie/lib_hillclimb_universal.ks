@@ -124,7 +124,12 @@ Function Score {
     print "eta too close                     " at (1, 26).
     local TimeCopy is BestCandidate[0].
     BestCandidate:remove(0).
-    BestCandidate:insert(0, TimeCopy+30).
+    if time:seconds < TimeCopy {
+      BestCandidate:insert(0, TimeCopy+30).
+    } else {
+      BestCandidate:insert(0, time:seconds+30).
+    }
+
   }
 
   if ship:body:atm:exists = true {

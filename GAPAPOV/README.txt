@@ -13,10 +13,11 @@ copypath("0:/boot/bootup_toukie", "").
 
 runpath(bootup_toukie).
 
+___________________________________________________________________________________________________
 
 IMPORTANT TECHNICAL CONFIGURATIONS:
 
-Only use this scrip when in a stable orbit (a high orbit is advised because you'll be able to use a higher timewarp).
+A high orbit is advised because you'll be able to use a higher timewarp.
 
 Increase the amount of patches KSP will show to >4. If this doesn't happen some calculations can't be run.
 To increase patches open KSP and go to:
@@ -24,11 +25,32 @@ To increase patches open KSP and go to:
   - Graphics
   - Conic Patch Limit
 
-GAPAPOV calculates how much Dv to burn using its calculated Dv value.
-This value changes when infinite fuel is used or if the amount of fuel gets edited while burning.
-So to prevent GAPAPOV from crashing don't change fuel mid burn.
-
-GAPAPOV can't accurately calculate the Dv if asparagus staging is being used.
-Be cautious when using asparagus staging.
-
 Accidental moon encounters have a big chance of messing stuff up.
+
+___________________________________________________________________________________________________
+
+I just got an error message telling me that the boot script or main script is out of date, what do I do?
+
+First delete:
+	- lib_toukie (folder)
+	- exe_toukie (folder)
+	- bootup_toukie (file inside of the boot folder)
+
+And download the newest version from: https://github.com/Toukie/KOS/releases
+Drag the /Script/ file from the zip file into the KSPfolder/Ships/ folder of your KSP install.
+reboot the processor by typing:
+
+reboot.
+
+Still getting an error message? Then your boot script is out of date.
+Eventhough you've replaced the boot file with the newest version the KOS processor still runs the old version.
+The new versions of GAPAPOV update it automaticly if your script is out of date but the older versions dont
+have the updater. So, to fix this manually type the following the KOS terminal:
+
+deletepath("1:/boot/bootup_toukie").
+copypath("0:/boot/bootup_toukie", "1:/boot/").
+reboot.
+
+If you still have problems make sure you've downloaded the newest version of GAPAPOV and make sure to delete the
+old files as mentoined above.
+___________________________________________________________________________________________________

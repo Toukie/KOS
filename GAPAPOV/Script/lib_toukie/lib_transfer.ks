@@ -1,13 +1,13 @@
 @lazyglobal off.
 
-// NOTE Line 40 accidental moon intercept stuff
-// NOTE Final correction has edited Inclination check, needs to be relative 15 degrees ish
 {
 
 global T_Transfer is lex(
   "InterplanetaryTransfer", InterplanetaryTransfer@,
   "MoonTransfer", MoonTransfer@,
-  "MoonToReferencePlanet", MoonToReferencePlanet@
+  "MoonToReferencePlanet", MoonToReferencePlanet@,
+  "MoonToMoon", MoonToMoon@,
+  "ChangeOrbit", ChangeOrbit@
   ).
 
 Function InterplanetaryTransfer {
@@ -31,13 +31,6 @@ Function InterplanetaryTransfer {
     }
   }
 
-  //local DayBeforeIntercept is time:seconds + eta:transition - (6 * 3600).
-  //warpto (DayBeforeIntercept).
-  //until time:seconds > DayBeforeIntercept {
-  //  print DayBeforeIntercept - time:seconds at(1, 10).
-  //  wait 1.
-  //}
-
   local TimeTillIntercept is time:seconds + eta:transition - 5.
   warpto(TimeTillIntercept).
   wait until time:seconds > TimeTillIntercept + 10.
@@ -56,17 +49,12 @@ Function InterplanetaryTransfer {
           if ship:orbit:periapsis < 30000 {
             local NewList is list(time:seconds + 30, 0, 0, 0).
             local NewScoreList is list(30000).
-            local NewRestrictionList is list(
-              "realnormal_antinormal_timeplus_timemin",
-              "realnormal_antinormal_timeplus_timemin",
-              "realnormal_antinormal_timeplus_timemin",
-              "realnormal_antinormal_timeplus_timemin",
-              "realnormal_antinormal_timeplus_timemin"
-              ).
+            local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin").
             local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
             T_ManeuverExecute["ExecuteManeuver"](FinalMan).
           }
 
+          // I dont even know what this variable is
           if NoAccidentalIntercept = true {
 
             local TimeTillMoonExit is time:seconds + eta:transition - 2.
@@ -81,13 +69,7 @@ Function InterplanetaryTransfer {
             if ship:orbit:periapsis < MinHeight {
               local NewList is list(time:seconds + 30, 0, 0, 0).
               local NewScoreList is list(MinHeight).
-              local NewRestrictionList is list(
-                "realnormal_antinormal_timeplus_timemin",
-                "realnormal_antinormal_timeplus_timemin",
-                "realnormal_antinormal_timeplus_timemin",
-                "realnormal_antinormal_timeplus_timemin",
-                "realnormal_antinormal_timeplus_timemin"
-                ).
+              local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin").
               local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
               T_ManeuverExecute["ExecuteManeuver"](FinalMan).
             }
@@ -103,15 +85,7 @@ Function InterplanetaryTransfer {
 
   local NewList is list(time:seconds + eta:periapsis, 0, 0, -100).
   local NewScoreList is list(TargetDestination).
-
-  local NewRestrictionList is list(
-    "none",
-    "none",
-    "none",
-    "none",
-    "none"
-    ).
-
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("none").
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
@@ -162,14 +136,13 @@ Function MoonTransfer {
     // only ever true for Gilly
     if TargetDestination:orbit:eccentricity > 0.1 {
       if not (TargetDestination:orbit:trueanomaly > 220 and TargetDestination:orbit:trueanomaly < 270) {
-        set kuniverse:timewarp:warp to T_Warp["GetAllowedTimeWarp"]().
+        T_Other["WarpSetter"](30, 100000).
         wait until TargetDestination:orbit:trueanomaly > 220 and TargetDestination:orbit:trueanomaly < 270.
-        set kuniverse:timewarp:warp to 0.
       }
-      set kuniverse:timewarp:warp to 0.
+      T_Other["WarpDecreaser"]().
     }
 
-    T_Warp["WarpToPhaseAngle"](TargetDestination, 1, ship, ship:body, true).
+    T_Warp["WarpToPhaseAngle"](TargetDestination, 1, ship, ship:body, 10000).
     T_TransferBurn["MoonInsertionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
 
     local MoonCorrectionBurnNeeded is true.
@@ -237,15 +210,7 @@ Function MoonTransfer {
   if eta:periapsis > 30 {
     local NewList is list(time:seconds + eta:periapsis, 0, 0, 0).
     local NewScoreList is list(TargetDestination).
-
-    local NewRestrictionList is list(
-      "realnormal_antinormal",
-      "realnormal_antinormal",
-      "realnormal_antinormal",
-      "realnormal_antinormal",
-      "realnormal_antinormal"
-      ).
-
+    local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
     local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
     T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
@@ -308,23 +273,16 @@ Function MoonToReferencePlanet {
     }
   }
 
-  set kuniverse:timewarp:warp to (T_Warp["GetAllowedTimeWarp"]()).
+  T_Other["WarpSetter"](30).
   local AngleFromPeriapsis is 100.
 
-  until AngleFromPeriapsis > 350 or AngleFromPeriapsis < 10 {
+  until AngleFromPeriapsis < 5 {
     set AngleFromPeriapsis to vang(body:orbit:velocity:orbit, ship:position - body:position).
     wait 0.
     T_ReadOut["RetrogradeAngleGUI"](AngleFromPeriapsis, 0).
   }
 
-  local warpnumber is 1.
-  until warpnumber = 8 {
-    set kuniverse:timewarp:warp to (T_Warp["GetAllowedTimeWarp"]() - warpnumber).
-    wait 5.
-    set WarpNumber to WarpNumber + 1.
-  }
-  wait 3.
-  set kuniverse:timewarp:warp to 0.
+  T_Other["WarpDecreaser"]().
 
   local TargetSMA is ship:altitude + 1.05 * ship:body:soiradius + ship:body:radius.
   local DvNeededForExit is T_Other["VisViva"](ship:altitude, TargetSMA).
@@ -357,7 +315,7 @@ Function MoonToReferencePlanet {
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
-// match inclination
+ // match inclination
   if TargetInclination = 3.1416 {
     wait 0.
   } else {
@@ -384,8 +342,35 @@ Function MoonToReferencePlanet {
   local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus").
   local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+}
 
- }
+Function ChangeOrbit {
+  Parameter TargetPeriapsis.
+  Parameter TargetInclination.
+
+  T_TransferBurn["InclinationMatcher2"](TargetInclination).
+
+  local TargetSMA is (TargetPeriapsis + ship:orbit:periapsis)/2 + ship:body:radius.
+  local DvNeededForTarPer is T_Other["VisViva"](ship:periapsis, TargetSMA).
+  local TarPerList is list(time:seconds + eta:periapsis, 0, 0, DvNeededForTarPer).
+  T_ManeuverExecute["ExecuteManeuver"](TarPerList).
+
+  local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
+  local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
+  local ApoOrPerETA is "x".
+
+  if ManVal1 < ManVal2 {
+    set ApoOrPerETA to eta:periapsis.
+  } else {
+    set ApoOrPerETA to eta:apoapsis.
+  }
+
+  local NewList is list(time:seconds + ApoOrPerETA, 0, 0, 0).
+  local NewScoreList is list().
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus").
+  local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+}
 
 }
 

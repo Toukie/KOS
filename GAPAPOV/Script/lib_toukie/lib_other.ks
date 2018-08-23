@@ -10,7 +10,9 @@ global T_Other is lexicon(
   "ClosestApproachGetter", ClosestApproachGetter@,
   "ClosestApproachRefiner", ClosestApproachRefiner@,
   "RemoveAllNodes", RemoveAllNodes@,
-  "NodeFromVector", NodeFromVector@
+  "NodeFromVector", NodeFromVector@,
+  "WarpSetter", WarpSetter@,
+  "WarpDecreaser", WarpDecreaser@
   ).
 
 Function ish {
@@ -187,5 +189,45 @@ Function NodeFromVector {
 
   return list(TimeTillNode, RadialComponent, NormalComponent, ProgradeComponent).
 }
+
+///
+///
+///
+
+Function WarpSetter {
+  Parameter NumberOfChecks.
+  Parameter WarpOverride is 0.
+
+  local WarpSpeed is round(ship:orbit:period/NumberOfChecks).
+
+  if WarpSpeed > 1000 {
+    if WarpSpeed < 8000 {
+      set WarpSpeed to 1000.
+    }
+
+    if WarpSpeed < 90000 {
+      set WarpSpeed to 10000.
+    }
+  } else {
+    if WarpSpeed > 300 {
+      set WarpSpeed to 1000.
+    }
+  }
+
+  if WarpOverride > 0 {
+    set WarpSpeed to WarpOverride.
+  }
+  
+  print "WarpSpeed: " + WarpSpeed.
+  set kuniverse:timewarp:rate to WarpSpeed.
+}
+
+Function WarpDecreaser {
+  set kuniverse:timewarp:warp to 0.
+  until kuniverse:timewarp:rate = 1 {
+    wait 1.
+  }
+}
+
 }
 print "read lib_other".

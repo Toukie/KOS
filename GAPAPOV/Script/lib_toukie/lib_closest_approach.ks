@@ -50,7 +50,11 @@ Function ClosestApproachFinder {
   if nextnode:orbit:hasnextpatch = true {
     if nextnode:orbit:nextpatch:body = TargetBody:body {
       set StartTime to time:seconds + eta:transition + 120.
-      set EndTime   to time:seconds + eta:transition + nextnode:orbit:nextpatch:period.
+      if nextnode:orbit:nextpatch:eccentricity < 1 {
+        set EndTime to time:seconds + eta:transition + nextnode:orbit:nextpatch:period.
+      } else {
+        set ErrorMode to true.
+      }
     } else {
       print "major error".
       set ErrorMode to true.

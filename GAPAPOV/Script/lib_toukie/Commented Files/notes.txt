@@ -7,8 +7,9 @@ ___________
 High Priority:
 
 Med Priority:
-- changing incl and SMA even when staying in orbit around same planet
-- for phase angle / ejection angle / angle from retrograde:
-  check if time warp is too fast or too slow
+- mun -> minmus "Interplanetary" transfer
 
 Low priority :
+- For hillclimb function: if same step has been made 5 times in a row make that step BIGGER
+- DV penalty for hillclimb
+

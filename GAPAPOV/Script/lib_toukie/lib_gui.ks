@@ -17,7 +17,7 @@ local gui4 is gui(300).
 local textbox1 is "x".
 local textbox2 is "x".
 local textbox3 is "x".
-local RendText is "x".
+local RendText is gui3:addtextfield("enter ship name").
 local RendWindows is "x".
 
 local TargetBody is "x".
@@ -57,10 +57,10 @@ Function GUISetup1 {
     if target:mass > 10^15 {
       set textbox1 to gui:addtextfield(target:name).
     } else {
-      set textbox1 to gui:addtextfield("Duna").
+      set textbox1 to gui:addtextfield(ship:body:name).
     }
   } else {
-    set textbox1 to gui:addtextfield("Duna").
+    set textbox1 to gui:addtextfield(ship:body:name).
   }
 
   gui:addlabel("<size=15>    </size>").
@@ -121,11 +121,11 @@ Function RendOptions {
     list targets in ShipList.
 
     for Shp in ShipList {
-      if Shp:name = target:name {
+      if Shp:name = target:name and Shp:typename = "vessel" {
         set RendText to gui3:addtextfield(target:name).
       }
     }
-    if RendText = "x" {
+    if RendText:text <> target:name {
       set RendText to gui3:addtextfield("Eagle").
     }
 
@@ -172,6 +172,7 @@ Function RendApply {
 
 Function RendOptionsConf {
   gui3:dispose().
+  gui4:dispose().
   set RendWindows to true.
   set FinishProcedure to true.
 }
@@ -358,6 +359,7 @@ Function CompleteParameterGUI {
 
 Function StatusCheck {
   local gui is gui(400).
+  set gui:y to 30.
   local StatusCheckDone is false.
 
   if ship:status <> "ORBITING" {

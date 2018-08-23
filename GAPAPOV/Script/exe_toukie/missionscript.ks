@@ -5,6 +5,28 @@ clearguis().
 set config:ipu to 200.
 core:doaction("Open Terminal", true).
 
+local LibVersion is "1.3.0".
+local ContinueStart is true.
+
+if defined BootVersion = false {
+  set ContinueStart to false.
+  if exists("1:/boot_updater") and exists("BootCheck") = false {
+    run boot_updater.
+  } else {
+    HUDtext("WARNING: BOOT VERSION OR MAIN SCRIPT OUT OF DATE, CHECK THE README.txt FILE", 15, 2, 30, red, true).
+  }
+} else if BootVersion <> LibVersion {
+  set ContinueStart to false.
+  if exists("1:/boot_updater") and exists("BootCheck") = false {
+    run boot_updater.
+  } else {
+    HUDtext("WARNING: BOOT VERSION OR MAIN SCRIPT OUT OF DATE, CHECK THE README.txt FILE", 15, 2, 30, red, true).
+  }
+}
+
+deletepath(BootCheck).
+
+if ContinueStart = true {
 if true=true  {
  T_Boot["CopyAndRunFile"]("lib_closest_approach", "0:/lib_toukie/").
  T_Boot["CopyAndRunFile"]("lib_docking", "0:/lib_toukie/").
@@ -40,3 +62,4 @@ for Eng in EngList {
 clearscreen.
 
 T_Boot["CopyAndRunFile"]("gapapov", "0:/exe_toukie/").
+}
