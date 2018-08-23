@@ -1,0 +1,45 @@
+To use KOS you need to have a KOS processor on your vessel, they can be found under the 'control' tab in the editor and are under 
+the same tab as the RCS thrusters and the reaction wheels.
+Right clicking the KOS processor in the editor after adding it to your vessel shows a screen where you can tweak settings of the
+KOS processor.
+
+There are two ways you can create KOS scripts: either you make them in game and edit them in game or you use a text editor.
+___________________________________________________________________________________________________________________________________
+
+First we'll look at making and editing scripts in game.
+Put your vessel with KOS processor on the launchpad and right click the processor.
+Press the button that says 'open terminal' and click on the window that just popped up.
+
+typing the following will create a file called 'hello', to enter the command press <ENTER> (don't forget the period at the end):
+
+edit hello.
+
+you can now edit the file and make your script for the processor to execute, the other tutorials will show how you can make a 
+working script. Keep in mind that files made in game dissapear after the vessel is gone.
+
+To run the file, type:
+
+run hello.
+__________________________________________________________________________________________________________________________________
+
+To use a text editor instead go to your KSP folder and go to /Ships/Script and create an empty file and name it whatever you want
+(be cautious using spaces in filenames because this might mess stuff up). All KOS script files should end with .ks.
+An example of a valid KOS script file name would be:
+
+hello.ks
+
+Running files you made using text editors is a bit more complex than if you'd make a file in game.
+This is because when you make a script in game the script is locally stored on the ship.
+Files you made with a text editor are saved in the archive, can be accessed from different saved games and won't be lost after
+the vessel is gone. You could compare it with ground control, which has infinite data storage and a spaceship which has limited
+space for data.
+
+To access the archive type:
+
+switch to 0.
+
+To run hello.ks type the same as above:
+
+run hello.
+___________________________________________________________________________________________________________________________________
+
