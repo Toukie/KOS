@@ -6,7 +6,6 @@ global T_Transfer is lex(
   "InterplanetaryTransfer", InterplanetaryTransfer@,
   "MoonTransfer", MoonTransfer@,
   "MoonToReferencePlanet", MoonToReferencePlanet@,
-  "MoonToMoon", MoonToMoon@,
   "ChangeOrbit", ChangeOrbit@
   ).
 
