@@ -10,8 +10,7 @@ global T_TransferBurn is lexicon(
   "MoonInsertionBurn", MoonInsertionBurn@,
   "MoonCorrectionBurn", MoonCorrectionBurn@,
   "MoonPostEncounterBurn", MoonPostEncounterBurn@,
-  "InclinationMatcher2", InclinationMatcher2@,
-  "MoonToMoonInsertionBurn", MoonToMoonInsertionBurn@
+  "InclinationMatcher2", InclinationMatcher2@
   ).
 ///
 /// INTERPLANETARY
