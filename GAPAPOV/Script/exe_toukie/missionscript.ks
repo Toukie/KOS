@@ -9,6 +9,7 @@ local LibVersion is "1.3.0".
 local ContinueStart is true.
 
 if defined BootVersion = false {
+  T_Boot["CopyFile"]("boot_updater", "0:/exe_toukie/").
   set ContinueStart to false.
   if exists("1:/boot_updater") and exists("BootCheck") = false {
     run boot_updater.
@@ -16,6 +17,7 @@ if defined BootVersion = false {
     HUDtext("WARNING: BOOT VERSION OR MAIN SCRIPT OUT OF DATE, CHECK THE README.txt FILE", 15, 2, 30, red, true).
   }
 } else if BootVersion <> LibVersion {
+  T_Boot["CopyFile"]("boot_updater", "0:/exe_toukie/").
   set ContinueStart to false.
   if exists("1:/boot_updater") and exists("BootCheck") = false {
     run boot_updater.
