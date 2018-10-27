@@ -1,18 +1,27 @@
 To run GAPAPOV you will first need to install KOS: https://ksp-kos.github.io/KOS/downloads_links.html#obtain
 
-Then drag the /Script/ folder from the zip file into your KSP install's /Ships/ folder and merge the folders if needed.
+Then drag the Script folder from the zip file into your KSP install's Ships/ folder and merge the folders if needed.
 
 If you already have an old version of GAPAPOV installed, delete:
 	- lib_toukie (folder)
 	- exe_toukie (folder)
 	- bootup_toukie (file inside of the boot folder)
 
-To open the KOS terminal right click the KOS processor and activate it. When IN ORBIT type the following to start the program, press the ENTER key to finish the sentence:
+Add a KOS terminal part to your vessel and go to the launchpad.
+To open the KOS terminal right click the KOS processor and activate it.
+In the terminal, type and press ENTER once you're done:
+
+edit startup.
+
+Don't forget to use a period at the end, a new window should appear.
+Copy the following piece of code using Ctrl + C and paste it in the new window by using Ctrl + V.
 
 copypath("0:/boot/bootup_toukie", "").
-
 runpath(bootup_toukie).
 
+Click on the save button and in the first terminal type:
+
+run startup.
 ___________________________________________________________________________________________________
 
 IMPORTANT TECHNICAL CONFIGURATIONS:
@@ -37,7 +46,7 @@ First delete:
 	- bootup_toukie (file inside of the boot folder)
 
 And download the newest version from: https://github.com/Toukie/KOS/releases
-Drag the /Script/ file from the zip file into the KSPfolder/Ships/ folder of your KSP install.
+Drag the /Script/ file from the zip file into the KSP folder Ships of your KSP install.
 reboot the processor by typing:
 
 reboot.
@@ -52,5 +61,5 @@ copypath("0:/boot/bootup_toukie", "1:/boot/").
 reboot.
 
 If you still have problems make sure you've downloaded the newest version of GAPAPOV and make sure to delete the
-old files as mentoined above.
+old files as mentioned above.
 ___________________________________________________________________________________________________
