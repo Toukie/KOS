@@ -5,7 +5,7 @@ global T_Boot is lexicon(
   "CopyFile", CopyFile@
   ).
 
-global BootVersion is "1.3.0".
+global BootVersion is "1.2.2".
 
 Function CopyAndRunFile {
   parameter TargetFile.
@@ -36,7 +36,7 @@ wait 0.
 
 switch to 1.
 
-CopyFile("boot_updater", "0:/exe_toukie/").
+CopyFile("boot_updater", "0:/boot/").
 CopyAndRunFile("missionscript", "0:/exe_toukie/").
 
 }

@@ -28,9 +28,31 @@ Function RendezvousSetup {
 
   parameter TargetDestination.
 
+	if true = false {
       local ArgOfPer1 is ship:orbit:argumentofperiapsis.
       local ArgOfPer2 is TargetDestination:orbit:argumentofperiapsis.
       local TrueAnomalyTargetPer is ArgOfPer2-ArgOfPer1.
+	  
+	  HUDtext("TA of target Pe on current orbit: " + TrueAnomalyTargetPer, 15, 2, 30, red, true).
+
+        if TrueAnomalyTargetPer < 0 {
+        set TrueAnomalyTargetPer to 360 - abs(TrueAnomalyTargetPer).
+		HUDtext("TA of target Pe on current orbit: " + TrueAnomalyTargetPer, 15, 2, 30, yellow, true).
+      }
+	 }
+	  
+	  local Per1 is time:seconds + T_TrueAnomaly["ETAToTrueAnomaly"](ship, 0).
+	  local Per2 is time:seconds + T_TrueAnomaly["ETAToTrueAnomaly"](TargetDestination, 0).
+
+	  local vec1 is positionat(ship, per1)-ship:body:position.
+	  local vecd1 is vecdraw(ship:body:position, vec1 , red, "per1", 1.0, false, 0.2).
+	  set vecd1:startupdater to {return ship:body:position.}.
+
+	  local vec2 is positionat(target, per2)-ship:body:position.
+	  local vecd2 is vecdraw(ship:body:position, vec2, red, "per2", 1.0, false, 0.2).
+	  set vecd2:startupdater to {return body:position.}.
+
+	  local TrueAnomalyTargetPer is vang(vec1,vec2).
 
       local TimeTargetPeriapsis is T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomalyTargetPer).
 

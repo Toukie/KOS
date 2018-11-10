@@ -5,7 +5,7 @@ clearguis().
 set config:ipu to 200.
 core:doaction("Open Terminal", true).
 
-local LibVersion is "1.3.0".
+local LibVersion is "1.2.2".
 local ContinueStart is true.
 
 if defined BootVersion = false {
@@ -25,6 +25,57 @@ if defined BootVersion = false {
 }
 
 deletepath(BootCheck).
+
+local FileList is List(
+ ("0:/lib_toukie/lib_closest_approach"),
+ ("0:/lib_toukie/lib_docking"),
+ ("0:/lib_toukie/lib_gapapov_main"),
+ ("0:/lib_toukie/lib_gui"),
+ ("0:/lib_toukie/lib_hillclimb_man_exe"),
+ ("0:/lib_toukie/lib_hillclimb_scoring"),
+ ("0:/lib_toukie/lib_hillclimb_universal"),
+ ("0:/lib_toukie/lib_inclination"),
+ ("0:/lib_toukie/lib_other"),
+ ("0:/lib_toukie/lib_phase_angle"),
+ ("0:/lib_toukie/lib_readout"),
+ ("0:/lib_toukie/lib_rendezvous"),
+ ("0:/lib_toukie/lib_stage"),
+ ("0:/lib_toukie/lib_steering"),
+ ("0:/lib_toukie/lib_transfer"),
+ ("0:/lib_toukie/lib_transfer_burns"),
+ ("0:/lib_toukie/lib_true_anomaly"),
+ ("0:/lib_toukie/lib_warp"),
+ ("0:/exe_toukie/gapapov")
+).
+
+Function FileSize {
+ parameter TargetFile.
+ if exists(TargetFile) {
+ return open(TargetFile):size.
+ }
+}
+
+Function AvailableSpaceCheck {
+ local AvailSpace is core:volume:freespace.
+ For SomeFile in FileList {
+  local LocalFileSize is FileSize(SomeFile).
+  set AvailSpace to AvailSpace - LocalFileSize.
+ }
+ print AvailSpace.
+ if AvailSpace < 0 {
+  HUDtext( "Not enough storage! Need " + abs(AvailSpace) + " more storage", 15, 2, 45, red, true).
+ }
+}
+
+local FileList is list().
+list Files in FileList.
+for SomeFile in FileList {
+  if SomeFile:name:contains("lib") {
+    deletepath(SomeFile).
+	}
+  }
+
+AvailableSpaceCheck().
 
 if ContinueStart = true {
 if true=true  {

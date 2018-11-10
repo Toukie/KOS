@@ -2,16 +2,17 @@ To run GAPAPOV you will first need to install KOS: https://ksp-kos.github.io/KOS
 
 Then drag the /Script/ folder from the zip file into your KSP install's /Ships/ folder and merge the folders if needed.
 
+If youre using steam you can right click KSP in the library and click on properties.
+Click on the local files tab and click on browse local files.
+
 If you already have an old version of GAPAPOV installed, delete:
 	- lib_toukie (folder)
 	- exe_toukie (folder)
 	- bootup_toukie (file inside of the boot folder)
+	- bootup_updater (file inside of the boot folder)
 
-To open the KOS terminal right click the KOS processor and activate it. When IN ORBIT type the following to start the program, press the ENTER key to finish the sentence:
-
-copypath("0:/boot/bootup_toukie", "").
-
-runpath(bootup_toukie).
+In the VAB in game go to the same tab where you can find SAS and RCS thrusters and place a kOS processor on your craft.
+Right click the kOS part and increase the storage capasity and make sure bootup_toukie is the bootfile.
 
 ___________________________________________________________________________________________________
 

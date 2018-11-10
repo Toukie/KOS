@@ -344,6 +344,13 @@ Function MoonToReferencePlanet {
   T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 }
 
+Function MoonToMoon {
+  Parameter TargetDestination.
+  Parameter TargetPeriapsis.
+  Parameter TargetInclination.
+  print "work in progress a niffo".
+}
+
 Function ChangeOrbit {
   Parameter TargetPeriapsis.
   Parameter TargetInclination.

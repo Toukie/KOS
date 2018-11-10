@@ -64,12 +64,15 @@ Function ApproachDockingPort {
   local Lock ShipToDIFOP to TargetDockingPort:nodeposition - ShipDockingPort:nodeposition + DistanceInFrontOfPort.
   local Lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
 
+  clearvecdraws().
+  local vecdDIFOP is vecdraw(TargetDockingPort:position, DistanceInFrontOfPort, RGB(1,0,0), "DistanceInFrontOfPort", 1.0, true, 0.2).
+  local vecdSTDIFOP is vecdraw(v(0,0,0), ShipToDIFOP, RGB(0,1,0), "ShipToDIFOP", 1.0, true, 0.2).
+  set vecdDIFOP:startupdater to {return DistanceInFrontOfPort.}.
+  set vecdSTDIFOP:startupdater to {return ShipToDIFOP.}.
+
   until ShipDockingPort:state <> "ready" {
     Translate((ShipToDIFOP:normalized*Speed) - RelativeVelocity).
-    clearvecdraws().
-    vecdraw(TargetDockingPort:position, DistanceInFrontOfPort, RGB(1,0,0), "DistanceInFrontOfPort", 1.0, true, 0.2).
-    vecdraw(v(0,0,0), ShipToDIFOP, RGB(0,1,0), "ShipToDIFOP", 1.0, true, 0.2).
-    local DistanceVector is (TargetDockingPort:nodeposition - ShipDockingPort:nodeposition).
+        local DistanceVector is (TargetDockingPort:nodeposition - ShipDockingPort:nodeposition).
     if vang(ShipDockingPort:portfacing:vector, DistanceVector) < 2 and abs(Distance - DistanceVector:mag) < ErrorAllowed {
       break.
     }
@@ -120,11 +123,13 @@ Function SidewaysApproach {
   local lock ShipToDNTP to TargetDockingPort:nodeposition - ShipDockingPort:nodeposition + DistanceNextToPort.
   local lock RelativeVelocity to ship:velocity:orbit - TargetDockingPort:ship:velocity:orbit.
 
+  local vecdDNTP is vecdraw(TargetDockingPort:position, DistanceNextToPort, RGB(1,0,0), "DistanceNextToPort", 1.0, true, 0.2).
+  local vecdSTDNTP is vecdraw(v(0,0,0), ShipToDNTP, RGB(0,1,0), "ShipToDNTP", 1.0, true, 0.2).
+  set vecdDNTP:startupdater to {return DistanceNextToPort.}.
+  set vecdSTDNTP:startupdater to {return ShipToDNTP.}.
+
   local BreakLoop is false.
   until BreakLoop = true {
-    clearvecdraws().
-    vecdraw(TargetDockingPort:position, DistanceNextToPort, RGB(1,0,0), "DistanceNextToPort", 1.0, true, 0.2).
-    vecdraw(v(0,0,0), ShipToDNTP, RGB(0,1,0), "ShipToDNTP", 1.0, true, 0.2).
     Translate((ShipToDNTP:normalized*Speed) - RelativeVelocity).
     if ShipToDNTP:mag < 0.1 {
       set BreakLoop to true.

@@ -193,6 +193,30 @@ Function InclinationMatcher2 {
   }
 }
 
+///
+/// MOON TO MOON (AKA SEMI INTERPLANETARY)
+///
+
+Function MoonToMoonInsertionBurn {
+  Parameter TargetDestination.
+  Parameter TargetPeriapsis.
+
+  local testph is T_PhaseAngle["PhaseAngleCalculation"](TargetDestination, ship:body, ship:body:body).
+  HUDtext("Phase angle " + testph, 5, 2, 30, red, true).
+
+  T_Warp["WarpToPhaseAngle"](TargetDestination, 1, ship:body, ship:body:body, 10000).
+  T_Warp["WarpToEjectionAngle"](TargetDestination, 1, ship:body, ship:body:body).
+  local ResultList is T_PhaseAngle["EjectionAngleVelocityCalculation"](TargetDestination, ship:body).
+  local InsertionBurnDv is ResultList[1].
+
+  local NewList is list(time:seconds + 300, 0, 0, InsertionBurnDv).
+  local NewScoreList is list(TargetDestination, TargetPeriapsis).
+  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("retrograde_realnormal_antinormal_radialin_radialout").
+  local FinalMan is T_HillUni["ResultFinder"](NewList, "Interplanetary", NewScoreList, NewRestrictionList).
+  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+
+}
+
 }
 
 print "read lib_transfer_burns".

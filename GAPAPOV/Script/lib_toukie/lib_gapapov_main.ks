@@ -55,9 +55,8 @@ global T_GAPAPOV is lexicon(
     if FinishProcedure = false {
       if CurBodyIsPlanet  = false {
         if ship:body:body = TargetBody:body {
-          HUDtext("Going from a moon to another moon is not available at the moment.", 5, 2, 30, red, true).
-		  HUDtext("Rebooting...", 5, 2, 30, red, true).
-          reboot.
+          T_Transfer["MoonToMoon"](TargetBody, TargetPeriapsis, TargetInclination).
+          set FinishProcedure to true.
         } else {
           T_Transfer["MoonTransfer"](TargetBody, TargetPeriapsis, TargetInclination).
           if ship:body = TargetBody {
