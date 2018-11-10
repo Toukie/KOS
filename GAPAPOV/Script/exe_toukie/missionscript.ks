@@ -112,5 +112,6 @@ for Eng in EngList {
 
 clearscreen.
 
+T_Stage["StageCheck"]().
 T_Boot["CopyAndRunFile"]("gapapov", "0:/exe_toukie/").
 }
