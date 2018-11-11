@@ -3,7 +3,7 @@ set kuniverse:timewarp:warp to 0.
 clearvecdraws().
 clearguis().
 set config:ipu to 200.
-core:doaction("Open Terminal", true).
+core:doaction("Close Terminal", true).
 
 local LibVersion is "1.4.1".
 local ContinueStart is true.
