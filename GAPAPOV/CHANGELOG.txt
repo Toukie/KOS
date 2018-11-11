@@ -1,3 +1,14 @@
+## 1.4.2 - 2018-11-11
+### Added
+  - HUD messages for when the script is complete
+### Edited
+  - Terminal closing automaticaly
+  - Circularizing before just changing orbit parameters is not needed anymore
+
+## 1.4.1 - 2018-11-11
+### Added
+  - Existing stage function to missionscript.ks
+  
 ## 1.4.0 - 2018-11-10
 ### Added
   - warning system for if you dont have enough storage space
