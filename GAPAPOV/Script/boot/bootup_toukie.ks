@@ -5,7 +5,7 @@ global T_Boot is lexicon(
   "CopyFile", CopyFile@
   ).
 
-global BootVersion is "1.2.2".
+global BootVersion is "1.4.1".
 
 Function CopyAndRunFile {
   parameter TargetFile.
