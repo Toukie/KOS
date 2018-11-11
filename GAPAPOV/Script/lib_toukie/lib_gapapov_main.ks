@@ -32,13 +32,29 @@ global T_GAPAPOV is lexicon(
     }
 
     if TargetInclination = 0 {
-      set TargetInclination to 0.001.
+      set TargetInclination to 0.000001.
     }
 
     if ship:body = TargetBody and RendezvousNeeded = false {
       T_Transfer["ChangeOrbit"](TargetPeriapsis, TargetInclination).
       set FinishProcedure to true.
     }
+	
+	if FinishProcedure = false {
+	  local CircParameter is T_GUI["CircGUI"]().
+	  local InputList is list().
+
+	  if CircParameter = "periapsis" {
+		set InputList to list(time:seconds + eta:periapsis, 0, 0, 0).
+		} else {
+  		  set InputList to list(time:seconds + eta:apoapsis, 0, 0, 0).
+		}
+
+	  local NewScoreList is list().
+	  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
+	  local FinalMan is T_HillUni["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
+	  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+	}
 
     if ship:body:body:name <> "Sun" {
       set CurBodyIsPlanet to false.
