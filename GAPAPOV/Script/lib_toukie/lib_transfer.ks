@@ -355,8 +355,10 @@ Function ChangeOrbit {
   Parameter TargetPeriapsis.
   Parameter TargetInclination.
 
-  T_TransferBurn["InclinationMatcher2"](TargetInclination).
-
+  if abs(TargetInclination - ship:orbit:inclination) > 0.04 {
+    T_TransferBurn["InclinationMatcher2"](TargetInclination).
+  }
+  
   local TargetSMA is (TargetPeriapsis + ship:orbit:periapsis)/2 + ship:body:radius.
   local DvNeededForTarPer is T_Other["VisViva"](ship:periapsis, TargetSMA).
   local TarPerList is list(time:seconds + eta:periapsis, 0, 0, DvNeededForTarPer).
