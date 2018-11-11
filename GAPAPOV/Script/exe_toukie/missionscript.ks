@@ -5,7 +5,7 @@ clearguis().
 set config:ipu to 200.
 core:doaction("Open Terminal", true).
 
-local LibVersion is "1.2.2".
+local LibVersion is "1.4.1".
 local ContinueStart is true.
 
 if defined BootVersion = false {
