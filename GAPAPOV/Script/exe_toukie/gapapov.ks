@@ -6,19 +6,18 @@ T_GUI["StatusCheck"]().
 local GivenParameterList is T_GUI["CompleteParameterGUI"]().
 T_ReadOut["InitialReadOut"](10).
 
-local CircParameter is T_GUI["CircGUI"]().
-local InputList is list().
-
-if CircParameter = "periapsis" {
-  set InputList to list(time:seconds + eta:periapsis, 0, 0, 0).
-} else {
-  set InputList to list(time:seconds + eta:apoapsis, 0, 0, 0).
-}
-
-local NewScoreList is list().
-local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
-local FinalMan is T_HillUni["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
-T_ManeuverExecute["ExecuteManeuver"](FinalMan).
-
 T_GAPAPOV["GAPAPOV"](GivenParameterList).
 clearguis().
+
+wait 5.
+HUDtext("Script complete", 5, 2, 30, red, true).
+wait 0.5.
+HUDtext("Script complete", 5, 2, 30, rgb(1, 0.647, 0), true).
+wait 0.5.
+HUDtext("Script complete", 5, 2, 30, yellow, true).
+wait 0.5.
+HUDtext("Script complete", 5, 2, 30, green, true).
+wait 0.5.
+HUDtext("Script complete", 5, 2, 30, blue, true).
+wait 0.5.
+HUDtext("Script complete", 5, 2, 30, purple, true).
