@@ -5,7 +5,7 @@ clearguis().
 set config:ipu to 200.
 core:doaction("Close Terminal", true).
 
-local LibVersion is "1.4.1".
+local LibVersion is "1.4.2".
 local ContinueStart is true.
 
 if defined BootVersion = false {
@@ -115,3 +115,4 @@ clearscreen.
 T_Stage["StageCheck"]().
 T_Boot["CopyAndRunFile"]("gapapov", "0:/exe_toukie/").
 }
+
