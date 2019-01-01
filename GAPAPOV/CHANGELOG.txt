@@ -1,3 +1,20 @@
+## 1.5.0 - 2019-01-01
+### Added 
+  - Launch script 
+  - Depency checker
+  - Option to cancel hillclimb penalties
+  - Dv hillclimb penalty (plus options to change it)
+### Edited
+  - When entering inclination for moons inclination bug fixed
+  - Staging bug solved
+  - Bootup now removes all GUIs, maneuvers and penalty files
+  - Added error message when trying to go to the sun
+  - Fixed return from moon bug
+  - Improved rendezvous periapsis location logic
+  - No more smaller orbit needed when performing rendezvous
+  - Fixed rendezvous warp logic
+  - Brought back vecdraw when docking 
+
 ## 1.4.2 - 2018-11-11
 ### Added
   - HUD messages for when the script is complete

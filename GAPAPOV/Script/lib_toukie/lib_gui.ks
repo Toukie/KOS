@@ -1,12 +1,9 @@
-@lazyglobal off.
-
-{
-
-global T_GUI is lexicon(
+global TX_lib_gui is lexicon(
   "CompleteParameterGUI", CompleteParameterGUI@,
   "StatusCheck", StatusCheck@,
   "CircGUI", CircGUI@
   ).
+local TXStopper is "[]".
 
 local gui is gui(400).
 local gui1 is gui(300).
@@ -32,6 +29,7 @@ local ErrorBoolean1 is "x".
 local ErrorMessage1 is "x".
 local ErrorMessage2 is "x".
 local ErrorMessage001 is "x".
+local ErrorMessage002 is "x".
 local ErrorMessage101 is "x".
 local ErrorMessage102 is "x".
 local ErrorMessage103 is "x".
@@ -65,7 +63,7 @@ Function GUISetup1 {
 
   gui:addlabel("<size=15>    </size>").
   gui:addlabel("<size=15>Periapsis at the target destination:</size>").
-  set textbox2 to gui:addtextfield("750000").
+  set textbox2 to gui:addtextfield("250000").
   gui:addlabel("<size=15>    </size>").
   gui:addlabel("<size=15>Inclination at the target destination:</size>").
   set textbox3 to gui:addtextfield("0").
@@ -103,7 +101,7 @@ Function CheckOptions {
   ErrorMessageShower().
 
   gui2:show().
-
+// if errormessage002 is false then 001 is also false
   if ErrorMessage1 = false and ErrorMessage2 = false and ErrorMessage001 = false {
     gui1:show().
     gui2:hide().
@@ -184,7 +182,11 @@ Function BodyNameCheck {
   list bodies in BodyList.
   For IndividualBody in BodyList {
     if IndividualBody:name = GivenName {
-      GUIEmptyBodyList:add(IndividualBody).
+      if IndividualBody:name <> "Sun" {
+        GUIEmptyBodyList:add(IndividualBody).
+      } else {
+        set ErrorMessage002 to true.
+      }
     }
   }
   if GUIEmptyBodyList:length = 1 {
@@ -256,6 +258,7 @@ Function FalseErrorSetter {
   set ErrorMessage1 to 0.
   set ErrorMessage2 to 0.
   set ErrorMessage001 to 0.
+  set ErrorMessage002 to 0.
   set ErrorMessage101 to 0.
   set ErrorMessage102 to 0.
   set ErrorMessage103 to 0.
@@ -295,6 +298,11 @@ Function ErrorMessageShower {
 
   if ErrorMessage001 = true {
     set gui2:addlabel("<size=15>incorrect body name</size>"):style:align to "center".
+    gui2:addlabel("<size=15>    </size>").
+  }
+
+  if ErrorMessage002 = true {
+    set gui2:addlabel("<size=15>can't choose the Sun as destination</size>"):style:align to "center".
     gui2:addlabel("<size=15>    </size>").
   }
 
@@ -386,11 +394,13 @@ Function CircGUI {
   set label1:style:align to "center".
   local PerButton is gui:addbutton("<size=15>Circularize at the periapsis</size>").
   local ApoButton is gui:addbutton("<size=15>Circularize at the apoapsis</size>").
+  local CanButton is gui:addbutton("<size=15>Don't circularize (not recommended)</size>").
 
   set gui:y to 100.
   gui:show().
   set PerButton:onclick to {set FinalOption to "periapsis".}.
   set ApoButton:onclick to {set FinalOption to "apoapsis".}.
+  set CanButton:onclick to {set FinalOption to "cancel".}.
 
   local StartTime is time:seconds + 20.
 
@@ -409,5 +419,4 @@ Function CircGUI {
   return FinalOption.
 }
 
-}
 print "read lib_gui".

@@ -1,11 +1,12 @@
-@lazyglobal off.
+
 
 {
 
-global T_Warp is lexicon(
+global TX_lib_warp is lexicon(
   "WarpToPhaseAngle", WarpToPhaseAngle@,
   "WarpToEjectionAngle", WarpToEjectionAngle@
   ).
+  local TXStopper is "[]".
 
 Function WarpToPhaseAngle {
 
@@ -15,17 +16,18 @@ Function WarpToPhaseAngle {
   Parameter ReferenceBody is sun.
   Parameter WarpOverride is 100000.
 
-  local CurrentPhaseAngle is T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
-  local TargetPhaseAngle  is T_PhaseAngle["PhaseAngleCalculation"](TargetPlanet, StartingBody, ReferenceBody).
+  local CurrentPhaseAngle is TX_lib_phase_angle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
+  local TargetPhaseAngle  is TX_lib_phase_angle["PhaseAngleCalculation"](TargetPlanet, StartingBody, ReferenceBody).
 
-  T_Other["WarpSetter"](30, WarpOverride).
+  TX_lib_other["WarpSetter"](75, WarpOverride).
 
-  until T_Other["ish"](CurrentPhaseAngle, TargetPhaseAngle, ishyness) {
-    set CurrentPhaseAngle to T_PhaseAngle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
-    T_ReadOut["PhaseAngleGUI"](CurrentPhaseAngle, TargetPhaseAngle).
+  // maybe add modfied ish where if its after the goal it doesnt register
+  until TX_lib_other["ish"](CurrentPhaseAngle, TargetPhaseAngle, ishyness) {
+    set CurrentPhaseAngle to TX_lib_phase_angle["CurrentPhaseAngleFinder"](TargetPlanet, StartingBody, ReferenceBody).
+    TX_lib_readout["PhaseAngleGUI"](CurrentPhaseAngle, TargetPhaseAngle).
   }
 
-  T_Other["WarpDecreaser"]().
+  TX_lib_other["WarpDecreaser"]().
   print CurrentPhaseAngle.
 }
 
@@ -41,8 +43,9 @@ Function WarpToEjectionAngle {
   Parameter StartingBody is ship:body.
   Parameter ReferenceBody is Sun.
 
-  local ResultList is T_PhaseAngle["EjectionAngleVelocityCalculation"](TargetPlanet, ReferenceBody).
+  local ResultList is TX_lib_phase_angle["EjectionAngleVelocityCalculation"](TargetPlanet, ReferenceBody).
   local EjectionAng is ResultList[0].
+  HUDtext("Insertion burn " + ResultList, 5, 2, 30, white, true).
 
   local CurrentEjectionAngle is 1000. // nonsense value for now
   local lock PosToNegAngle to vcrs(vcrs(ship:velocity:orbit, body:position),ship:body:orbit:velocity:orbit).
@@ -50,9 +53,9 @@ Function WarpToEjectionAngle {
 
   print "ejection angle needed: " + EjectionAng.
 
-  T_Other["WarpSetter"](30).
+  TX_lib_other["WarpSetter"](75).
 
-  until T_Other["Ish"](CurrentEjectionAngle, EjectionAng, Ishyness){
+  until TX_lib_other["Ish"](CurrentEjectionAngle, EjectionAng, Ishyness){
 
   if TargetPlanet:orbit:semimajoraxis > StartingBody:orbit:semimajoraxis {
     if vang(-body:position, PosToNegAngle) < vang(-body:position, NegToPosAngle) {
@@ -75,7 +78,7 @@ Function WarpToEjectionAngle {
   }
  }
 
- T_Other["WarpDecreaser"]().
+ TX_lib_other["WarpDecreaser"]().
 }
 }
 print "read lib_warp".

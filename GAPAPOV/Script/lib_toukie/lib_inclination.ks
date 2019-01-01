@@ -1,15 +1,16 @@
-@lazyglobal off.
+
 
 // Dont use this when matching inclination with planets out of current SOI
 
 {
 
-global T_Inclination is lexicon(
+global TX_lib_inclination is lexicon(
   "RelativeAngleCalculation", RelativeAngleCalculation@,
   "AscenDescenFinder", AscenDescenFinder@,
   "DeltaVTheta", DeltaVTheta@,
   "InclinationMatcher", InclinationMatcher@
   ).
+  local TXStopper is "[]".
 
 Function RelativeAngleCalculation {
 
@@ -96,8 +97,8 @@ Function InclinationMatcher {
   local TrueAnomDN is ANDNList[1].
   local TimeNeeded is "x".
 
-  local TimeAN is T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomAN).
-  local TimeDN is T_TrueAnomaly["ETAToTrueAnomaly"](ship, TrueAnomDN).
+  local TimeAN is TX_lib_true_anomaly["ETAToTrueAnomaly"](ship, TrueAnomAN).
+  local TimeDN is TX_lib_true_anomaly["ETAToTrueAnomaly"](ship, TrueAnomDN).
   local ThetaChange is RelativeAngleCalculation(TargetDestination).
 
   local ANDv is DeltaVTheta(TrueAnomAN, ThetaChange).
@@ -118,10 +119,10 @@ Function InclinationMatcher {
 
   local InputList is list(time:seconds + TimeNeeded, 0, DvNeeded, 0).
   local NewScoreList is list(TargetDestination).
-  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_radialout_radialin_timeplus_timemin").
-  local FinalMan is T_HillUni["ResultFinder"](InputList, "Inclination", NewScoreList, NewRestrictionList).
+  local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal_radialout_radialin_timeplus_timemin").
+  local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](InputList, "Inclination", NewScoreList, NewRestrictionList).
 
-  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
 
 }
 }

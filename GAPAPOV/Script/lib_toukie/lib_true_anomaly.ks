@@ -1,12 +1,9 @@
-@lazyglobal off.
-
-{
-
-global T_TrueAnomaly is lexicon(
+global TX_lib_true_anomaly is lexicon(
   "TrueAnomalyAtTime", TrueAnomalyAtTime@,
   "TimePeToTa", TimePeToTa@,
   "ETAToTrueAnomaly", ETAToTrueAnomaly@
   ).
+  local TXStopper is "[]".
 
 Function TrueAnomalyAtTime {
   Parameter TimeTill.
@@ -59,5 +56,5 @@ FUNCTION ETAToTrueAnomaly {
 
   return TimeTillDesiredTrueAnomaly.
 }
-}
+
 print "read lib_true_anomaly".

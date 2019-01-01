@@ -1,8 +1,8 @@
-@lazyglobal off.
+
 
 {
 
-global T_ScoreOptions is lex (
+global TX_lib_hillclimb_scoring is lex (
   "Circularize",     ScoreCircularize@,
   "Inclination",     ScoreInclination@,
   "Apoapsis",        ScoreApoapsis@,
@@ -14,6 +14,9 @@ global T_ScoreOptions is lex (
   "Interplanetary",  ScoreInterplanetary@,
   "FinalCorrection", ScoreFinalCorrection@
   ).
+  local TXStopper is "[]".
+
+global DvPenaltyModifier is 0.1.
 
 Function ScoreCircularize {
   Parameter ScoreList.
@@ -41,6 +44,10 @@ Function ScoreInclination {
     local ThetaChange is abs(ScoreManeuver:orbit:inclination - WantedInclin).
     if  ThetaChange < 0.002 {
       set ThetaChange to 0.
+    }
+    if ScoreManeuver:orbit:hasnextpatch {
+      print "has next patch while scoring inclination".
+      set ThetaChange to 1000.
     }
     return ThetaChange.
   }
@@ -152,6 +159,13 @@ Function ScoreMoonTransfer {
   local TransferPenalty    is "x".
   local PeriapsisPenalty   is "x".
   local InclinationPenalty is "x".
+
+  TX_lib_gui_dv_penalty["CheckDvFileNames"]().
+  local DeltaVPenalty is round(DvPenaltyModifier*ScoreManeuver:deltav:mag, 2).
+  if DeltaVPenalty < 0 {
+    set DeltaVPenalty to 0.
+  }
+
   local TotalPenalty is "x".
 
   if TargetInclination = 0 {
@@ -173,19 +187,33 @@ Function ScoreMoonTransfer {
       set PeriapsisPenalty   to (20^64)/2.
       set InclinationPenalty to 10^5.
     } else {
-      set TransferPenalty    to T_Other["ClosestApproachRefiner"](TargetBody).
+      set TransferPenalty    to TX_lib_other["ClosestApproachRefiner"](TargetBody).
       set TransferPenalty    to round(TransferPenalty/(10^3)).
       set PeriapsisPenalty   to 10000.
       set InclinationPenalty to 10^5.
     }
   }
   //clearscreen.
-  set TotalPenalty to TransferPenalty + PeriapsisPenalty + InclinationPenalty.
-  print "TransferPenalty:   " + TransferPenalty + "                   " at(1,20).
-  print "PeriapsisPenalty:  " + PeriapsisPenalty + "                  " at(1,21).
-  print "InclinationPenalty " + InclinationPenalty + "                " at(1,22).
-  print "TotalPenalty:      " + TotalPenalty + "                      " at(1,23).
-  T_ReadOut["AdvScoreReadOutGUI"]("Moon", list(TransferPenalty, PeriapsisPenalty, InclinationPenalty, TotalPenalty)).
+
+  if exists(CancelInclinationHillclimb) {
+    set InclinationPenalty to 0.
+  }
+
+  if exists(CancelPeriapsisHillclimb) {
+    set PeriapsisPenalty to 0.
+  }
+
+  if exists(CancelDvHillclimb) {
+    set DeltaVPenalty to 0.
+  }
+
+  set TotalPenalty to TransferPenalty + PeriapsisPenalty + InclinationPenalty + DeltaVPenalty.
+  print "TransferPenalty:    " + TransferPenalty + "                   " at(1,20).
+  print "PeriapsisPenalty:   " + PeriapsisPenalty + "                  " at(1,21).
+  print "InclinationPenalty: " + InclinationPenalty + "                " at(1,22).
+  print "DeltaVPenalty:      " + DeltaVPenalty + "                     " at(1,23).
+  print "TotalPenalty:       " + TotalPenalty + "                      " at(1,24).
+  TX_lib_readout["AdvScoreReadOutGUI"]("Moon", list(TransferPenalty, PeriapsisPenalty, InclinationPenalty, DeltaVPenalty, TotalPenalty)).
   return TotalPenalty.
 }
 
@@ -199,6 +227,12 @@ Function ScoreInterplanetary {
   local TransferPenalty is 10000.
   local SOIexitPenalty  is 10^6.
   local PeriapsisPenalty is 10000.
+
+  TX_lib_gui_dv_penalty["CheckDvFileNames"]().
+  local DeltaVPenalty is round(DvPenaltyModifier*ScoreManeuver:deltav:mag, 2).
+  if DeltaVPenalty < 0 {
+    set DeltaVPenalty to 0.
+  }
 
   if ScoreManeuver:orbit:hasnextpatch = true {
     if ScoreManeuver:orbit:nextpatch:body = TargetBody {
@@ -223,7 +257,7 @@ Function ScoreInterplanetary {
     } else {
       set SOIexitPenalty to 0.
 
-      set TransferPenalty to T_ClosestApp["ClosestApproachFinder"](TargetBody).
+      set TransferPenalty to TX_lib_closest_approach["ClosestApproachFinder"](TargetBody).
       print TransferPenalty at(1,36).
       set TransferPenalty to round(TransferPenalty/(10^6)).
       set PeriapsisPenalty to 10000.
@@ -232,12 +266,21 @@ Function ScoreInterplanetary {
 
   wait 0.
   //clearscreen.
-  local TotalPenalty is (TransferPenalty+SOIexitPenalty+PeriapsisPenalty).
+
+  if exists(CancelPeriapsisHillclimb) {
+    set PeriapsisPenalty to 0.
+  }
+
+  if exists(CancelDvHillclimb) {
+    set DeltaVPenalty to 0.
+  }
+
+  local TotalPenalty is (TransferPenalty+SOIexitPenalty+PeriapsisPenalty+DeltaVPenalty).
   print "TransferPenalty   " + TransferPenalty + "            " at(1,20).
   print "SOIexitPenalty    " + SOIexitPenalty + "             " at(1,21).
   print "PeriapsisPenalty  " + PeriapsisPenalty + "           " at(1,22).
   print "Total Penalty     " + TotalPenalty + "               " at(1,23).
-  T_ReadOut["AdvScoreReadOutGUI"]("Interplanetary", list(TransferPenalty, SOIexitPenalty, PeriapsisPenalty, TotalPenalty)).
+  TX_lib_readout["AdvScoreReadOutGUI"]("Interplanetary", list(TransferPenalty, SOIexitPenalty, PeriapsisPenalty, DeltaVPenalty, TotalPenalty)).
   return TotalPenalty.
 }
 
@@ -262,22 +305,39 @@ Function ScoreFinalCorrection {
   local InclinationPenalty is 10^9.
   local PeriapsisPenalty is round((abs(ScoreManeuver:orbit:periapsis - TargetPeriapsis)/TargetPeriapsis), 2).
 
+  TX_lib_gui_dv_penalty["CheckDvFileNames"]().
+  local DeltaVPenalty is round(DvPenaltyModifier*ScoreManeuver:deltav:mag, 2).
+  if DeltaVPenalty < 0 {
+    set DeltaVPenalty to 0.
+  }
+
   if abs(ScoreManeuver:orbit:inclination - TargetInclination) < 15 {
     set InclinationPenalty to 0.
   } else {
     set InclinationPenalty to round((InclinationPenaltyWeight * abs(ScoreManeuver:orbit:inclination - TargetInclination)/TargetInclination), 2).
   }
 
-  local TotalPenalty is (InclinationPenalty + PeriapsisPenalty).
+  if exists(CancelInclinationHillclimb) {
+    set InclinationPenalty to 0.
+  }
+
+  if exists(CancelPeriapsisHillclimb) {
+    set PeriapsisPenalty to 0.
+  }
+
+  if exists(CancelDvHillclimb) {
+    set DeltaVPenalty to 0.
+  }
+
+  local TotalPenalty is (InclinationPenalty + PeriapsisPenalty + DeltaVPenalty).
   print "                                       " at(1,10).
   print "InclinationPenalty  " + InclinationPenalty + "             " at(1,11).
   print "PeriapsisPenalty    " + PeriapsisPenalty + "           " at(1,12).
   print "Total Penalty       " + TotalPenalty + "          " at(1,13).
   //return PeriapsisPenalty.
-  T_ReadOut["AdvScoreReadOutGUI"]("Improve", list(InclinationPenalty, PeriapsisPenalty, TotalPenalty)).
+  TX_lib_readout["AdvScoreReadOutGUI"]("Improve", list(InclinationPenalty, PeriapsisPenalty, DeltaVPenalty, TotalPenalty)).
   return TotalPenalty.
 }
-
 
 }
 

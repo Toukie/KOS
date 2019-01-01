@@ -1,4 +1,4 @@
-global T_ReadOut is lexicon(
+global TX_lib_readout is lexicon(
   "InitialReadOut", InitialReadOut@,
   "PhaseAngleGUI", PhaseAngleGUI@,
   "EjectionAngleGUI", EjectionAngleGUI@,
@@ -8,10 +8,13 @@ global T_ReadOut is lexicon(
   "RetrogradeAngleGUI", RetrogradeAngleGUI@,
   "QuitAllGUI", QuitAllGUI@
   ).
+  local TXStopper is "[]".
 
 global ReadOutGUI  is gui(300).
 local IntroductionGUI is ReadOutGUI:addlabel("<size=20>Readouts:</size>").
 set IntroductionGUI:style:align to "center".
+local ExplanLabel is ReadOutGUI:addlabel("<size=15>(A score of 0 is a perfect score)</size>").
+set ExplanLabel:style:align to "center".
 ReadOutGUI:addlabel("<size=20>__________________________</size>").
 
 local Ph1 is ReadOutGUI:addlabel("<size=15>Current phase angle: </size>").
@@ -69,6 +72,9 @@ set Ad6:enabled to false.
 local Ad7 is ReadOutGUI:addlabel("<size=15></size>").
 local Ad8 is ReadOutGUI:addtextfield("Loading...").
 set Ad8:enabled to false.
+local Ad9 is ReadOutGUI:addlabel("<size=15></size>").
+local Ad10 is ReadOutGUI:addtextfield("Loading...").
+set Ad10:enabled to false.
 local AdBreaker is ReadOutGUI:addlabel("<size=20>__________________________</size>").
 
 local PhaseAngleReadOut is false.
@@ -131,6 +137,8 @@ Function InitialReadOut {
       Ad6:show().
       Ad7:show().
       Ad8:show().
+      Ad9:show().
+      Ad10:show().
       AdBreaker:show().
     }
 
@@ -238,9 +246,9 @@ Function AdvScoreReadOutGUI {
   Parameter ProfileName.
   Parameter ScoreInputList.
 
-  local MoonProfile is list("Transfer penalty:", "Periapsis penalty:", "Inclination penalty:", "Total penalty:").
-  local PlanProfile is list("Transfer penalty:", "SOIexit penalty:", "Periapsis penalty:", "Total penalty:").
-  local ImprProfile is list("Inclination penalty:" ,"Periapsis penalty:", "Total penalty:").
+  local MoonProfile is list("Transfer penalty:", "Periapsis penalty:", "Inclination penalty:", "Delta V penalty:", "Total penalty:").
+  local PlanProfile is list("Transfer penalty:", "SOIexit penalty:", "Periapsis penalty:", "Delta V penalty:", "Total penalty:").
+  local ImprProfile is list("Inclination penalty:" ,"Periapsis penalty:", "Delta V penalty:", "Total penalty:").
 
   local Profile is list().
 
@@ -258,9 +266,14 @@ Function AdvScoreReadOutGUI {
   set Ad4:text to ScoreInputList[1]:tostring.
   set Ad5:text to Profile[2].
   set Ad6:text to ScoreInputList[2]:tostring.
-  if Profile:length = 4 {
+  set Ad7:text to Profile[3].
+  set Ad8:text to ScoreInputList[3]:tostring.
+
+  if Profile:length = 5 {
     set Ad7:text to Profile[3].
     set Ad8:text to ScoreInputList[3]:tostring.
+    set Ad9:text to Profile[4].
+    set Ad10:text to ScoreInputList[4]:tostring.
   }
   set AdvScoreReadOut to true.
 }
@@ -274,6 +287,8 @@ Function QuitAdvScoreReadOutGUI {
   Ad6:hide().
   Ad7:hide().
   Ad8:hide().
+  Ad9:hide().
+  Ad10:hide().
   AdBreaker:hide().
   set AdvScoreReadOut to false.
 }

@@ -1,14 +1,15 @@
-@lazyglobal off.
+
 
 {
 
-global T_Transfer is lex(
+global TX_lib_transfer is lex(
   "InterplanetaryTransfer", InterplanetaryTransfer@,
   "MoonTransfer", MoonTransfer@,
   "MoonToReferencePlanet", MoonToReferencePlanet@,
   "MoonToMoon", MoonToMoon@,
   "ChangeOrbit", ChangeOrbit@
   ).
+  local TXStopper is "[]".
 
 Function InterplanetaryTransfer {
   Parameter TargetDestination.
@@ -16,11 +17,11 @@ Function InterplanetaryTransfer {
   Parameter TargetInclination.
   Parameter PreciseCirc is true.
 
-  T_TransferBurn["InsertionBurn"](TargetDestination, TargetPeriapsis).
-  local CorrectionBurnNeeded is T_TransferBurn["ExitSOI"](TargetDestination).
+  TX_lib_transfer_burn["InsertionBurn"](TargetDestination, TargetPeriapsis).
+  local CorrectionBurnNeeded is TX_lib_transfer_burn["ExitSOI"](TargetDestination).
 
   until CorrectionBurnNeeded = false {
-    T_TransferBurn["CorrectionBurn"](TargetDestination, TargetPeriapsis).
+    TX_lib_transfer_burn["CorrectionBurn"](TargetDestination, TargetPeriapsis).
     if ship:orbit:hasnextpatch = true {
       if ship:orbit:nextpatch:body = TargetDestination {
         set CorrectionBurnNeeded to false.
@@ -35,13 +36,15 @@ Function InterplanetaryTransfer {
   warpto(TimeTillIntercept).
   wait until time:seconds > TimeTillIntercept + 10.
 
-  T_TransferBurn["FinalCorrectionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
+  TX_lib_transfer_burn["FinalCorrectionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
+  local NoAccidentalIntercept is true.
 
   if ship:orbit:hasnextpatch = true {
     if ship:orbit:nextpatch:hasnextpatch = true {
       if ship:orbit:nextpatch:nextpatch:body = TargetDestination {
         if eta:transition < eta:periapsis {
           print "we've got an accidental moon encounter!".
+          set NoAccidentalIntercept to false.
           local TimeTillMoonEncounter is time:seconds + eta:transition - 2.
           warpto(TimeTillMoonEncounter).
           wait until time:seconds > TimeTillMoonEncounter + 4.
@@ -49,9 +52,9 @@ Function InterplanetaryTransfer {
           if ship:orbit:periapsis < 30000 {
             local NewList is list(time:seconds + 30, 0, 0, 0).
             local NewScoreList is list(30000).
-            local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin").
-            local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-            T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+            local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin").
+            local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
+            TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
           }
 
           // I dont even know what this variable is
@@ -69,14 +72,12 @@ Function InterplanetaryTransfer {
             if ship:orbit:periapsis < MinHeight {
               local NewList is list(time:seconds + 30, 0, 0, 0).
               local NewScoreList is list(MinHeight).
-              local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin").
-              local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-              T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+              local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin").
+              local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
+              TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
             }
-          }
-
-          if NoAccidentalIntercept = false {
-            T_TransferBurn["MoonTransfer"](TargetDestination, TargetPeriapsis, TargetInclination, true).
+          } else {
+            TX_lib_transfer_burn["MoonTransfer"](TargetDestination, TargetPeriapsis, TargetInclination, true).
           }
         }
       }
@@ -85,20 +86,20 @@ Function InterplanetaryTransfer {
 
   local NewList is list(time:seconds + eta:periapsis, 0, 0, -100).
   local NewScoreList is list(TargetDestination).
-  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("none").
-  local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+  local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("none").
+  local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
 
-  T_TransferBurn["InclinationMatcher2"](TargetInclination).
+  TX_lib_transfer_burn["InclinationMatcher2"](TargetInclination).
 
   if PreciseCirc = true {
 
     print "precision mode on".
     // we have circularized by now so nows the time to match periapsis and apoapsis to the target
 
-    local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
+    local DvNeededForTar is TX_lib_other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
     local TarList is list(time:seconds + eta:apoapsis, 0, 0, DvNeededForTar).
-    T_ManeuverExecute["ExecuteManeuver"](TarList).
+    TX_lib_hillclimb_man_exe["ExecuteManeuver"](TarList).
 
     // check if we need to go to apo or per to circularize
 
@@ -115,9 +116,9 @@ Function InterplanetaryTransfer {
       set ApoOrPerETA to eta:apoapsis.
     }
 
-    local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
+    local DvNeededForCirc is TX_lib_other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
     local CircList is list(time:seconds + ApoOrPerETA, 0, 0, DvNeededForCirc).
-    T_ManeuverExecute["ExecuteManeuver"](CircList).
+    TX_lib_hillclimb_man_exe["ExecuteManeuver"](CircList).
   }
 }
 
@@ -128,22 +129,23 @@ Function MoonTransfer {
   Parameter AccidentalInterceptFromPlanet is false.
 
   if AccidentalInterceptFromPlanet = false {
-    local ThetaChange is T_Inclination["RelativeAngleCalculation"](TargetDestination).
+    local ThetaChange is TX_lib_inclination["RelativeAngleCalculation"](TargetDestination).
     if ThetaChange > 0.01 {
-      T_Inclination["InclinationMatcher"](TargetDestination).
+      TX_lib_inclination["InclinationMatcher"](TargetDestination).
     }
 
     // only ever true for Gilly
     if TargetDestination:orbit:eccentricity > 0.1 {
       if not (TargetDestination:orbit:trueanomaly > 220 and TargetDestination:orbit:trueanomaly < 270) {
-        T_Other["WarpSetter"](30, 100000).
+        TX_lib_other["WarpSetter"](75, 100000).
         wait until TargetDestination:orbit:trueanomaly > 220 and TargetDestination:orbit:trueanomaly < 270.
       }
-      T_Other["WarpDecreaser"]().
+      TX_lib_other["WarpDecreaser"]().
     }
 
-    T_Warp["WarpToPhaseAngle"](TargetDestination, 1, ship, ship:body, 10000).
-    T_TransferBurn["MoonInsertionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
+    TX_lib_warp["WarpToPhaseAngle"](TargetDestination, 10, ship, ship:body, 10000).
+    // stop when in 10 degrees range and then make a maneuver at the time it takes for 5 degrees
+    TX_lib_transfer_burn["MoonInsertionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
 
     local MoonCorrectionBurnNeeded is true.
     if ship:orbit:hasnextpatch {
@@ -153,7 +155,7 @@ Function MoonTransfer {
     }
 
     until MoonCorrectionBurnNeeded = false {
-      T_TransferBurn["MoonCorrectionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
+      TX_lib_transfer_burn["MoonCorrectionBurn"](TargetDestination, TargetPeriapsis, TargetInclination).
 
       if ship:orbit:hasnextpatch {
         if ship:orbit:nextpatch:body = TargetDestination {
@@ -181,7 +183,7 @@ Function MoonTransfer {
 
   if ship:orbit:eccentricity > 100 {
     local EccentricityGoDown is ship:orbit:eccentricity.
-    T_Steering["SteeringOrbitRet"]().
+    TX_lib_steering["SteeringOrbitRet"]().
     until EccentricityGoDown < 100 {
       lock throttle to min(1, (abs(EccentricityGoDown-100))/100).
       set EccentricityGoDown to ship:orbit:eccentricity.
@@ -195,50 +197,54 @@ Function MoonTransfer {
   print "PRE INCL CORRECTION".
   local NewList is list(time:seconds + 30, 0, 0, 0).
   local NewScoreList is list(TargetDestination, TargetPeriapsis, TargetInclination).
-  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("prograde_retrograde").
+  local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("prograde_retrograde").
   if abs(ship:orbit:inclination - TargetInclination) > 15 {
     set NewScoreList to list(TargetDestination, TargetPeriapsis, TargetInclination, 10).
-    set NewRestrictionList to T_HillUni["IndexFiveFolderder"]("nothing").
+    set NewRestrictionList to TX_lib_hillclimb_universal["IndexFiveFolderder"]("nothing").
     print "no restrictions!".
   }
-  local FinalMan is T_HillUni["ResultFinder"](NewList, "FinalCorrection", NewScoreList, NewRestrictionList).
-  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 
-  //T_TransferBurn["MoonPostEncounterBurn"](TargetPeriapsis, TargetInclination).
+  TX_lib_hillclimb_canceler["HillClimbCancel"]().
+  local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "FinalCorrection", NewScoreList, NewRestrictionList).
+  TX_lib_hillclimb_canceler["HillCancelOptionHider"]().
+
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
+
+  //TX_lib_transfer_burn["MoonPostEncounterBurn"](TargetPeriapsis, TargetInclination).
   print "POST INCL CORRECTION".
 
   if eta:periapsis > 30 {
     local NewList is list(time:seconds + eta:periapsis, 0, 0, 0).
     local NewScoreList is list(TargetDestination).
-    local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
-    local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+    local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal").
+    local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+    TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
 
     print "checking eccentricity".
     until ship:orbit:eccentricity <= 1 {
-      local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
+      local DvNeededForCirc is TX_lib_other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
       local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
-      T_ManeuverExecute["ExecuteManeuver"](CircList).
+      TX_lib_hillclimb_man_exe["ExecuteManeuver"](CircList).
     }
 
   } else {
     print "periapsis too close emergency burn".
     until ship:orbit:eccentricity <= 1 {
-      local DvNeededForCirc is T_Other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
+      local DvNeededForCirc is TX_lib_other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
       local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
-      T_ManeuverExecute["ExecuteManeuver"](CircList).
+      TX_lib_hillclimb_man_exe["ExecuteManeuver"](CircList).
     }
   }
 
   // we have circularized by now so nows the time to match periapsis and apoapsis to the target
   // but first match inclination
 
-  T_TransferBurn["InclinationMatcher2"](TargetInclination).
+  TX_lib_transfer_burn["InclinationMatcher2"](TargetInclination).
 
   print "matching per and apo".
-  local DvNeededForTar is T_Other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
+  local DvNeededForTar is TX_lib_other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
   local TarList is list(time:seconds + eta:apoapsis, 0, 0, DvNeededForTar).
-  T_ManeuverExecute["ExecuteManeuver"](TarList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](TarList).
 
   // check if we need to go to apo or per to circularize
 
@@ -255,9 +261,9 @@ Function MoonTransfer {
     set ApoOrPerETA to eta:apoapsis.
   }
 
-  local DvNeededForCirc is T_Other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
+  local DvNeededForCirc is TX_lib_other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
   local CircList is list(time:seconds + ApoOrPerETA, 0, 0, DvNeededForCirc).
-  T_ManeuverExecute["ExecuteManeuver"](CircList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](CircList).
 }
 
 Function MoonToReferencePlanet {
@@ -266,6 +272,8 @@ Function MoonToReferencePlanet {
   Parameter TargetPeriapsis is 0.5*StartingBody:orbit:semimajoraxis.
   Parameter TargetInclination is 3.1416.
 
+  HUDtext("returning from a moon", 5, 2, 30, red, true).
+
   if StartingBody:body = sun {
     local JunkTime is time:seconds + 2.
     until time:seconds > JunkTime {
@@ -273,21 +281,21 @@ Function MoonToReferencePlanet {
     }
   }
 
-  T_Other["WarpSetter"](30).
+  TX_lib_other["WarpSetter"](75).
   local AngleFromPeriapsis is 100.
 
-  until AngleFromPeriapsis < 5 {
+  until AngleFromPeriapsis < 10 {
     set AngleFromPeriapsis to vang(body:orbit:velocity:orbit, ship:position - body:position).
     wait 0.
-    T_ReadOut["RetrogradeAngleGUI"](AngleFromPeriapsis, 0).
+    TX_lib_readout["RetrogradeAngleGUI"](AngleFromPeriapsis, 0).
   }
 
-  T_Other["WarpDecreaser"]().
+  TX_lib_other["WarpDecreaser"]().
 
   local TargetSMA is ship:altitude + 1.05 * ship:body:soiradius + ship:body:radius.
-  local DvNeededForExit is T_Other["VisViva"](ship:altitude, TargetSMA).
+  local DvNeededForExit is TX_lib_other["VisViva"](ship:altitude, TargetSMA).
   local ExitList is list(time:seconds, 0, 0, DvNeededForExit).
-  T_ManeuverExecute["ExecuteManeuver"](ExitList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](ExitList).
 
   local CriticalHeight is 100000.
   if ship:body:body:atm:exists {
@@ -303,29 +311,29 @@ Function MoonToReferencePlanet {
     print "Correction needed!".
     local NewList is list(time:seconds + 30, 0, 0, 0).
     local NewScoreList is list(CriticalHeight).
-    local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin_prograde_retrograde_radialin_radialout").
-    local FinalMan is T_HillUni["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
-    T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+    local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal_timeplus_timemin_prograde_retrograde_radialin_radialout").
+    local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Periapsis", NewScoreList, NewRestrictionList).
+    TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
   }
 
   // circularize at the rough periapsis
   local NewList is list(time:seconds + eta:periapsis, 0, 0, 0).
   local NewScoreList is list().
-  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("nothing").
-  local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+  local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("nothing").
+  local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
 
  // match inclination
   if TargetInclination = 3.1416 {
     wait 0.
   } else {
-    T_TransferBurn["InclinationMatcher2"](TargetInclination).
+    TX_lib_transfer_burn["InclinationMatcher2"](TargetInclination).
   }
 
   local TargetSMA is (TargetPeriapsis + ship:orbit:periapsis)/2 + ship:body:radius.
-  local DvNeededForTarPer is T_Other["VisViva"](ship:periapsis, TargetSMA).
+  local DvNeededForTarPer is TX_lib_other["VisViva"](ship:periapsis, TargetSMA).
   local TarPerList is list(time:seconds + eta:periapsis, 0, 0, DvNeededForTarPer).
-  T_ManeuverExecute["ExecuteManeuver"](TarPerList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](TarPerList).
 
   local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
   local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
@@ -339,9 +347,9 @@ Function MoonToReferencePlanet {
 
   local NewList is list(time:seconds + ApoOrPerETA, 0, 0, 0).
   local NewScoreList is list().
-  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus").
-  local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+  local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal_timeplus").
+  local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
 }
 
 Function MoonToMoon {
@@ -356,13 +364,13 @@ Function ChangeOrbit {
   Parameter TargetInclination.
 
   if abs(TargetInclination - ship:orbit:inclination) > 0.04 {
-    T_TransferBurn["InclinationMatcher2"](TargetInclination).
+    TX_lib_transfer_burn["InclinationMatcher2"](TargetInclination).
   }
-  
+
   local TargetSMA is (TargetPeriapsis + ship:orbit:periapsis)/2 + ship:body:radius.
-  local DvNeededForTarPer is T_Other["VisViva"](ship:periapsis, TargetSMA).
+  local DvNeededForTarPer is TX_lib_other["VisViva"](ship:periapsis, TargetSMA).
   local TarPerList is list(time:seconds + eta:periapsis, 0, 0, DvNeededForTarPer).
-  T_ManeuverExecute["ExecuteManeuver"](TarPerList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](TarPerList).
 
   local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
   local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
@@ -376,9 +384,9 @@ Function ChangeOrbit {
 
   local NewList is list(time:seconds + ApoOrPerETA, 0, 0, 0).
   local NewScoreList is list().
-  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal_timeplus").
-  local FinalMan is T_HillUni["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
-  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
+  local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal_timeplus").
+  local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
 }
 
 }

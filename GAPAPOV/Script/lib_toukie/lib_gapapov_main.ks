@@ -1,10 +1,9 @@
-@lazyglobal off.
-
 {
 
-global T_GAPAPOV is lexicon(
+global TX_lib_gapapov_main is lexicon(
   "GAPAPOV", GAPAPOV@
   ).
+local TXStopper is "[]".
 
   Function GAPAPOV {
     Parameter GivenParameterList.
@@ -31,29 +30,70 @@ global T_GAPAPOV is lexicon(
       set TargetInclination to GivenParameterList[2].
     }
 
+    //// EXPERIMENTAL
+
+    when alt:radar > ship:body:atm:height then {
+      wait 2.
+      TX_lib_other["SolarPanelAction"]("extend").
+    }
+
+    if ship:status = "prelaunch" or ship:status = "landed" {
+      local CountDown is 5.
+      until CountDown = 0 {
+        HUDtext(CountDown + "...", 5, 2, 30, white, true).
+        wait 1.
+        set CountDown to CountDown-1.
+      }
+      HUDtext("Ignition", 5, 2, 30, white, true).
+      local TemporaryInclination is TargetInclination.
+
+      if TargetBody:body = ship:body {
+        //HUDtext("going to a moon", 5, 2, 30, white, true).
+        set TemporaryInclination to TargetBody:orbit:inclination.
+        if TemporaryInclination = 0 {
+          set TemporaryInclination to 0.000001.
+        }
+      } else if ship:body:body <> "Sun" {
+        //HUDtext("going to a planet", 5, 2, 30, white, true).
+        set TemporaryInclination to 0.000001.
+      } else {
+        //HUDtext("staying in " +ship:body:name + "'s sphere of influence", 5, 2, 30, white, true).
+      }
+
+      local TemporaryPeriapsis is TargetPeriapsis.
+      if ship:body <> TargetBody {
+        set TemporaryPeriapsis to 100000.
+      }
+      TX_lib_atmos_launch["MainLaunch"](TemporaryPeriapsis, TemporaryInclination).
+      TX_lib_atmos_launch["Circularize"]().
+    }
+
+    //// EXPERIMENTAL
+
     if TargetInclination = 0 {
       set TargetInclination to 0.000001.
     }
 
     if ship:body = TargetBody and RendezvousNeeded = false {
-      T_Transfer["ChangeOrbit"](TargetPeriapsis, TargetInclination).
+      TX_lib_transfer["ChangeOrbit"](TargetPeriapsis, TargetInclination).
       set FinishProcedure to true.
+    } else {
+	  local CircParameter is TX_lib_gui["CircGUI"]().
+
+    if CircParameter <> "cancel" {
+      local InputList is list().
+
+      if CircParameter = "periapsis" {
+      set InputList to list(time:seconds + eta:periapsis, 0, 0, 0).
+      } else {
+          set InputList to list(time:seconds + eta:apoapsis, 0, 0, 0).
+      }
+
+      local NewScoreList is list().
+      local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal").
+      local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
+      TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
     }
-	
-	if FinishProcedure = false {
-	  local CircParameter is T_GUI["CircGUI"]().
-	  local InputList is list().
-
-	  if CircParameter = "periapsis" {
-		set InputList to list(time:seconds + eta:periapsis, 0, 0, 0).
-		} else {
-  		  set InputList to list(time:seconds + eta:apoapsis, 0, 0, 0).
-		}
-
-	  local NewScoreList is list().
-	  local NewRestrictionList is T_HillUni["IndexFiveFolderder"]("realnormal_antinormal").
-	  local FinalMan is T_HillUni["ResultFinder"](InputList, "Circularize", NewScoreList, NewRestrictionList).
-	  T_ManeuverExecute["ExecuteManeuver"](FinalMan).
 	}
 
     if ship:body:body:name <> "Sun" {
@@ -71,10 +111,12 @@ global T_GAPAPOV is lexicon(
     if FinishProcedure = false {
       if CurBodyIsPlanet  = false {
         if ship:body:body = TargetBody:body {
-          T_Transfer["MoonToMoon"](TargetBody, TargetPeriapsis, TargetInclination).
+          TX_lib_transfer["MoonToMoon"](TargetBody, TargetPeriapsis, TargetInclination).
           set FinishProcedure to true.
         } else {
-          T_Transfer["MoonTransfer"](TargetBody, TargetPeriapsis, TargetInclination).
+          HUDtext("Going back to " + ship:body:body:name, 5, 2, 30, white, true).
+          TX_lib_transfer["MoonToReferencePlanet"](ship:body, ship:body:body, TargetPeriapsis, TargetInclination).
+          TX_lib_transfer["ChangeOrbit"](TargetPeriapsis, TargetInclination).
           if ship:body = TargetBody {
             set FinishProcedure to true.
           }
@@ -88,19 +130,19 @@ global T_GAPAPOV is lexicon(
         set TemporaryDestination to TargetBody:body.
       }
       if TemporaryDestination <> ship:body {
-        T_Transfer["InterplanetaryTransfer"](TemporaryDestination, TargetPeriapsis, TargetInclination).
+        TX_lib_transfer["InterplanetaryTransfer"](TemporaryDestination, TargetPeriapsis, TargetInclination).
       }
 
       if TarBodyIsPlanet = false {
-        T_Transfer["MoonTransfer"](TargetBody, TargetPeriapsis, TargetInclination).
+        TX_lib_transfer["MoonTransfer"](TargetBody, TargetPeriapsis, TargetInclination).
       }
     }
 
     if RendezvousNeeded = true {
       HUDtext("Rendezvous is go", 5, 2, 30, red, true).
-      T_Rendezvous["CompleteRendezvous"](TargetVessel).
+      TX_lib_rendezvous["CompleteRendezvous"](TargetVessel).
       HUDtext("Rendezvous cleared, docking...", 5, 2, 30, red, true).
-      T_Docking["Dock"](TargetVessel).
+      TX_lib_docking["Dock"](TargetVessel).
     }
   }
 

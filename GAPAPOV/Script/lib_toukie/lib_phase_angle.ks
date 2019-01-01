@@ -1,13 +1,14 @@
-@lazyglobal off.
+
 
 {
 
-global T_PhaseAngle is lexicon(
+global TX_lib_phase_angle is lexicon(
   "PhaseAngleCalculation", PhaseAngleCalculation@,
   "CurrentPhaseAngleFinder", CurrentPhaseAngleFinder@,
   "GetGrandparentBody", GetGrandparentBody@,
   "EjectionAngleVelocityCalculation", EjectionAngleVelocityCalculation@
   ).
+  local TXStopper is "[]".
 
 Function PhaseAngleCalculation {
   Parameter TargetDestination.

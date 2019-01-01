@@ -1,10 +1,11 @@
-@lazyglobal off.
+
 
 {
 
-global T_ManeuverExecute is lexicon(
+global TX_lib_hillclimb_man_exe is lexicon(
   "ExecuteManeuver", ExecuteManeuver@
   ).
+  local TXStopper is "[]".
 
 Function TimeTillManeuverBurn {
 
@@ -25,6 +26,11 @@ Function TimeTillManeuverBurn {
     set eIsp to eISP + ((EngMax/LocalMaxThrust)*eng:isp).
   }
   local Ve is eIsp*9.80665.
+
+  if Ve = 0 {
+    HUDtext("Error: no active engines, reboot with active engines", 15, 2, 30, red, true).
+  }
+
   local FinalMass is (mass*constant():e^(-1*DvNeeded/Ve)).
   local Accel1 is (LocalMaxThrust/FinalMass).
   local BurnTime is (DvNeeded/((Accel0 + Accel1)/2)).
@@ -40,10 +46,12 @@ Function PerformBurn {
   Parameter StartT.
   Parameter ThrustLimit is 100.
 
+  log nextnode:deltav:mag + ", " to burnstats.ks.
+
   local StopBurn is false.
   sas off.
 
-  T_Steering["SteeringManeuver"]().
+  TX_lib_steering["SteeringManeuver"]().
 
   if nextnode:deltav:mag < 0.02 {
     set StopBurn to true.

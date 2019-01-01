@@ -1,11 +1,12 @@
-@lazyglobal off.
+@Lazyglobal off.
 
 {
 
-global T_ClosestApp is lexicon(
+global TX_lib_closest_approach is lexicon(
   "ClosestApproachFinder", ClosestApproachFinder@,
   "OtherClosestApproachFinder", OtherClosestApproachFinder@
   ).
+  local TXStopper is "[]".
 
 Function DistanceAtTime {
   Parameter T.
@@ -80,7 +81,7 @@ Function ClosestApproachFinder {
   print "km:    " + round(ClosestApproach/1000) + "                 " at(1,11).
   print "Mm:    " + round(ClosestApproach/1000000) + "              " at(1,12).
   print "Gm:    " + round(ClosestApproach/1000000000) + "           " at(1,13).
-  T_ReadOut["ClosestApproachGUI"](ClosestApproach).
+  TX_lib_readout["ClosestApproachGUI"](ClosestApproach).
   return ClosestApproach.
 
 }
@@ -124,7 +125,7 @@ Function OtherClosestApproachFinder {
   print "km:    " + round(ClosestApproach/1000) + "                 " at(1,11).
   print "Mm:    " + round(ClosestApproach/1000000) + "              " at(1,12).
   print "Gm:    " + round(ClosestApproach/1000000000) + "           " at(1,13).
-  T_ReadOut["ClosestApproachGUI"](ClosestApproach).
+  TX_lib_readout["ClosestApproachGUI"](ClosestApproach).
   return ClosestApproach.
 
 }
@@ -134,4 +135,4 @@ Function OtherClosestApproachFinder {
 ///
 }
 
-print "read lib_closest_approach".
+print "read lib_closest approach".

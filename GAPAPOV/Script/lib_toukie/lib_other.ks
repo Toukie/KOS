@@ -1,8 +1,8 @@
-@lazyglobal off.
+
 
 {
 
-global T_Other is lexicon(
+global TX_lib_other is lexicon(
   "ish", ish@,
   "VisViva", VisViva@,
   "CurrentDvCalc", CurrentDvCalc@,
@@ -12,8 +12,11 @@ global T_Other is lexicon(
   "RemoveAllNodes", RemoveAllNodes@,
   "NodeFromVector", NodeFromVector@,
   "WarpSetter", WarpSetter@,
-  "WarpDecreaser", WarpDecreaser@
+  "WarpDecreaser", WarpDecreaser@,
+  "SolarPanelAction", SolarPanelAction@,
+  "ClearAllStuff", ClearAllStuff@
   ).
+  local TXStopper is "[]".
 
 Function ish {
   Parameter a.
@@ -159,7 +162,7 @@ Function ClosestApproachRefiner {
   print "km:    " + round(ClosestApproach/1000) + "                 " at(1,11).
   print "Mm:    " + round(ClosestApproach/1000000) + "              " at(1,12).
   print "Gm:    " + round(ClosestApproach/1000000000) + "           " at(1,13).
-  T_ReadOut["ClosestApproachGUI"](ClosestApproach).
+  TX_lib_readout["ClosestApproachGUI"](ClosestApproach).
   return ClosestApproach.
 }
 
@@ -200,24 +203,6 @@ Function WarpSetter {
 
   local WarpSpeed is round(ship:orbit:period/NumberOfChecks).
 
-  if WarpSpeed > 1000 {
-    if WarpSpeed < 8000 {
-      set WarpSpeed to 1000.
-    }
-
-    if WarpSpeed < 90000 {
-      set WarpSpeed to 10000.
-    }
-  } else {
-    if WarpSpeed > 300 {
-      set WarpSpeed to 1000.
-    }
-  }
-
-  if WarpOverride > 0 {
-    set WarpSpeed to WarpOverride.
-  }
-  
   print "WarpSpeed: " + WarpSpeed.
   set kuniverse:timewarp:rate to WarpSpeed.
 }
@@ -226,6 +211,26 @@ Function WarpDecreaser {
   set kuniverse:timewarp:warp to 0.
   until kuniverse:timewarp:rate = 1 {
     wait 1.
+  }
+}
+
+Function SolarPanelAction {
+  Parameter SolarStatus.
+  // "deploy", "retract", "toggle"
+  list parts in PartListOfShip.
+  for SomePart in PartListOfShip {
+    if SomePart:name:contains("solarpanel") {
+      if SomePart:hasmodule("ModuleDeployableSolarPanel") {
+        SomePart:getmodule("ModuleDeployableSolarPanel"):doaction(SolarStatus + " solar panel", true).
+      }
+    }
+  }
+}
+
+Function ClearAllStuff {
+  clearscreen.
+  until hasnode = false {
+    remove nextnode.
   }
 }
 

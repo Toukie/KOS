@@ -1,8 +1,8 @@
-@lazyglobal off.
+
 
 {
 
-global T_Steering is lexicon(
+global TX_lib_steering is lexicon(
   "SteeringOrbitRet", SteeringOrbitRet@,
   "SteeringOrbitPro", SteeringOrbitPro@,
   "SteeringOrbitNorm", SteeringOrbitNorm@,
@@ -13,6 +13,7 @@ global T_Steering is lexicon(
   "SteeringAntiTarget", SteeringAntiTarget@,
   "SteeringManeuver", SteeringManeuver@
   ).
+  local TXStopper is "[]".
 
 Function SteeringOrbitRet {
 

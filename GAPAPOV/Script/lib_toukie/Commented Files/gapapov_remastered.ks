@@ -32,7 +32,7 @@ Function GAPAPOV {
 
   if ship:body = TargetBody and RendezvousNeeded = false {
     // we only have to change periapsis / Inclination
-    T_Transfer["ChangeOrbit"](TargetPeriapsis, TargetInclination).
+    TX_lib_transfer["ChangeOrbit"](TargetPeriapsis, TargetInclination).
     set FinishProcedure to true.
   }
 
@@ -54,11 +54,11 @@ Function GAPAPOV {
     if CurBodyIsPlanet  = false {
       if ship:body:body = TargetBody:body {
         // Mun -> Minmus situation
-        T_Transfer["MoonToMoon"](TargetBody, TargetPeriapsis, TargetInclination).
+        TX_lib_transfer["MoonToMoon"](TargetBody, TargetPeriapsis, TargetInclination).
         set FinishProcedure to true.
       } else {
         // return to parent body (i.e. Mun -> kerbin) and all other burns
-        T_Transfer["MoonToReferencePlanet"](ship:body, ship:body:body, TargetPeriapsis, TargetInclination).
+        TX_lib_transfer["MoonToReferencePlanet"](ship:body, ship:body:body, TargetPeriapsis, TargetInclination).
         if ship:body = TargetBody {
           set FinishProcedure to true.
         }
@@ -76,12 +76,12 @@ Function GAPAPOV {
     }
     if TemporaryDestination <> ship:body {
       // i.e. Kerbin -> Mun would go to kerbin (again) if there was no check
-      T_Transfer["InterplanetaryTransfer"](TemporaryDestination, TargetPeriapsis, TargetInclination).
+      TX_lib_transfer["InterplanetaryTransfer"](TemporaryDestination, TargetPeriapsis, TargetInclination).
     }
 
     if TarIsPlanet = false {
       // go to moon! i.e. Kerbin -> Mun or Duna -> Ike
-      T_Transfer["MoonTransfer"](TargetBody, TargetPeriapsis, TargetInclination).
+      TX_lib_transfer["MoonTransfer"](TargetBody, TargetPeriapsis, TargetInclination).
     }
     set FinishProcedure to true // for formality (we wont be using this var anymore)
   }
@@ -89,8 +89,8 @@ Function GAPAPOV {
   if RendezvousNeeded = true {
     // do rendezvous (we've just gotten ourselfs in the right orbit)
     HUDtext("Rendezvous is go", 5, 2, 30, red, true).
-    T_Rendezvous["CompleteRendezvous"](TargetVessel).
+    TX_lib_rendezvous["CompleteRendezvous"](TargetVessel).
     HUDtext("Rendezvous cleared, docking...", 5, 2, 30, red, true).
-    T_Docking["Dock"](TargetVessel).
+    TX_lib_docking["Dock"](TargetVessel).
   }
 }

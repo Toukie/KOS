@@ -1,4 +1,4 @@
-@lazyglobal off.
+
 
 {
 
@@ -10,7 +10,7 @@ local Candidates    is list().
 ///
 // if input = output --> no progress, move on!
 
-global T_HillUni is lex(
+global TX_lib_hillclimb_universal is lex(
   "ResultFinder",        ResultFinder@,
   "ScoreImproveCompare", ScoreImproveCompare@,
   "Score",               Score@,
@@ -20,6 +20,7 @@ global T_HillUni is lex(
   "Improve",             Improve@,
   "IndexFiveFolderder", IndexFiveFolderder@
   ).
+  local TXStopper is "[]".
 
 Function ResultFinder {
   Parameter NodeList.
@@ -132,21 +133,24 @@ Function Score {
 
   }
 
-  if ship:body:atm:exists = true {
-    if ScoreManeuver:orbit:periapsis < ship:body:atm:height {
-      set Result to 2^64.
-      print "periapsis under atm            " at(1,26).
+  // if sub_orbital dont penalize below atmosphere
+  if ship:status <> "sub_orbital" {
+    if ship:body:atm:exists = true {
+      if ScoreManeuver:orbit:periapsis < ship:body:atm:height {
+        set Result to 2^64.
+        print "periapsis under atm            " at(1,26).
+      }
     }
-  }
 
-  if ScoreManeuver:orbit:periapsis < 0 {
-    set Result to 2^64.
-    print "periapsis under surf            " at(1,26).
-  }
+    if ScoreManeuver:orbit:periapsis < 0 {
+      set Result to 2^64.
+      print "periapsis under surf            " at(1,26).
+    }
 
-  if Result < 0 {
-    set Result to 2^64.
-    print "result under 0            " at(1,26).
+    if Result < 0 {
+      set Result to 2^64.
+      print "result under 0            " at(1,26).
+    }
   }
 
   remove ScoreManeuver.
@@ -160,7 +164,7 @@ Function ScoreExecuter {
 
   if ScoreType = WantedScoreType {
     //print "its a go".
-    return T_ScoreOptions[WantedScoreType](ScoreList).
+    return TX_lib_hillclimb_scoring[WantedScoreType](ScoreList).
   } else {
     return 20^63.
   }
@@ -259,7 +263,7 @@ Function Improve {
     set ScoreToBeat to round(ScoreToBeat, 5).
     print "CandidateScore: " + CandidateScore + "                     "at (1,28).
     print "ScoreToBeat..:    " + ScoreToBeat + "                        " at (1,29).
-    T_ReadOut["CandidateScoreGUI"](CandidateScore, ScoreToBeat).
+    TX_lib_readout["CandidateScoreGUI"](CandidateScore, ScoreToBeat).
     if CandidateScore < ScoreToBeat {
       set ScoreToBeat to CandidateScore.
       set BestCandidate to Candidate.
