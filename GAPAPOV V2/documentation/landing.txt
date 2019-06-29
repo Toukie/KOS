@@ -1,0 +1,77 @@
+given: hard coded coordinates of biome
+
+match incl with latitude
+SHIP:GEOPOSITION is current geoposition
+
+GeoCoordinates:POSITION gives the position to the target geocoordinates
+
+vxcl(ship:up, GeoCoordinates:POSITION):mag gets rid of all vertical components. It gives the horizontal distance to the position
+
+check for the norther/southermost latitude
+
+Function LatScore {
+  parameter NodeList.
+  parameter ParameterList. // not needed for this instance
+
+  AddManeuver(NodeList).
+  local ScoreManeuver is nextnode.
+  local Score is ScoreManeuver:orbit:eccentricity.
+  remove nextnode.
+  return Score.
+}
+
+Function LatScore {
+  parameter TimeTill.
+  parameter TargetLat.
+
+  local PredictedLat is body:geopositionof(positionat(ship, time:seconds + TimeTill)).
+  local LatPenalty is abs((TargetLat - PredictedLat)/TargetLat).
+  return LatPenalty.
+}
+
+TX_lib_hillclimb_main["MinGoldSection"](LatScore@:bind(TimeTill, TargetLat),
+0, ship:orbit:period).
+
+set GoodValue to MinGoldSection(ScoreFunction@:bind(NodeList, IndexNeeded, ParameterList, ScoreSystem),
+OwnBoundaries[0],
+OwnBoundaries[1],
+xtol,
+ftol).
+
+
+
+OLD system
+
+local StepsNeeded is 1.
+if nextnode:orbit:hasnextpatch {
+  local NoMorePatch is false.
+  until NoMorePatch = true {
+    if hasnode {
+      remove nextnode.
+      wait 0.
+    }
+    set StepsNeeded to StepsNeeded + 1.
+
+    set TarPeriod to (TimeTill/StepsNeeded).
+
+    set TarSMA to (((TarPeriod^2)*ship:body:mu)/(4*constant:pi^2))^(1/3).
+
+    local DvNeeded is TX_lib_calculations["VisViva"](StartAlt, TarSMA).
+    set ApproachNode to list(time:seconds + TimeTill, 0, 0, DvNeeded).
+    local RealNode is node(ApproachNode[0], ApproachNode[1], ApproachNode[2], ApproachNode[3]).
+    add RealNode.
+    wait 0.
+
+    if nextnode:orbit:hasnextpatch = false {
+      print "we dont have a next patch!".
+      print nextnode:orbit:hasnextpatch.
+      set NoMorePatch to true.
+    }
+    remove nextnode.
+    wait 0.
+    print "still has a nextpatch".
+    print "StepsNeeded " + StepsNeeded.
+    print "TarSMA " + round(TarSMA).
+    print "Dv Needed " + round(DvNeeded, 2).
+  }
+}

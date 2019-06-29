@@ -1,0 +1,631 @@
+Golden Search Method: https://www.youtube.com/watch?v=VBFuqglVW3c
+
+golden = golden ratio - 1
+x1 = xhi - golden * (xhi -xlo) // c
+x2 = xlo + golden * (xhi -xlo) // d
+
+function min_goldsection {
+  parameter fn, a, b, xtol is 1e-5, ftol is 1e-5.
+  local golden is 2 / (1 + sqrt(5)).
+  local cgolden is 1 - golden.
+  local c is golden * a + cgolden * b.
+  local d is cgolden * a + golden * b.
+
+  // a---c--d---b
+  local fa is fn(a).
+  local fb is fn(b).
+  local fc is fn(c).
+  local fd is fn(d).
+  local dx is 0.
+  local df is 0.
+  local next is 0. // 1 if next update is C, 2 if D
+
+  if fc < fa and fc < fd {
+    set dx to d - a.
+    set df to min(abs(fd - fc), abs(fa - fc)).
+    // relabel D as B, C as D
+    set b to d.
+    set fb to fd.
+    set d to c.
+    set fd to fc.
+    set next to 1.
+  }
+  else {
+    set dx to b - c.
+    set df to min(abs(fc - fd), abs(fb - fd)).
+    // relabel C as A, D as C
+    set a to c.
+    set fa to fc.
+    set c to d.
+    set fc to fd.
+    set next to 2.
+  }
+
+  until abs(dx) < xtol or abs(df) < ftol {
+    if next = 1 {
+      set c to golden * a + cgolden * b.
+      set fc to fn(c).
+    }
+    else {
+      set d to cgolden * a + golden * b.
+      set fd to fn(d).
+    }
+    if fc < fa and fc < fd {
+      set dx to d - a.
+      set df to min(abs(fd - fc), abs(fa - fc)).
+      // relabel D as B, C as D
+      set b to d.
+      set fb to fd.
+      set d to c.
+      set fd to fc.
+      set next to 1.
+    }
+    else {
+      set dx to b - c.
+      set df to min(abs(fc - fd), abs(fb - fd)).
+      // relabel C as A, D as C
+      set a to c.
+      set fa to fc.
+      set c to d.
+      set fc to fd.
+      set next to 2.
+    }
+  }
+  // return the argument of the minimal value found so far
+  if next = 1 { return d. }
+  else { return c. }
+}
+
+fn is a univariable function to minimize. a and b are the arguments between the search is performed.
+In other words, you say "I want to find x that minimizes fn(x) such as a < x < b".
+Your fn might be score(x0 + x, y0, ...), then you are effectively finding an increment to the current x0.
+
+xtol is the desired accuracy in X, ftol means "stop the iterations if the last improvement in function value was smaller smaller than ftol".
+For the actual optimization: let's say you've put the maneuvr on apoapsis and want to find the prograde maneuver that minimizes the eccentricity.
+You just arbitrarily start with a 100 m/s prograde maneuver.
+That makes the ecc after, say, 0.05. First thing to ask: is the score more likely to improve with a positive or negative increment? You make a small increment, say, 1 m/s, and that makes ecc 0.0502. So, now you know that it's probably better to have the prograde dV less than 100.
+Now you go in the chosen direction, making each step larger than the previous one and keeping track of the last 3 scores. To keep the numbers interer, I'll use 2 as the step widening factor.
+
+0. Initial state:
+Tracked (dv, ecc): [(100, 0.05)]. Step: 1. Current x: 100. Direction: backwards (-1).
+1. current_x -> current_x + direction * step = 99.
+ecc(x) = 0.0495. Score improved.
+Tracked -> [(100, 0.05), (99, 0.0495)].
+Step -> Step * 2 = 2.
+2. current_x -> current_x + direction * step = 97.
+ecc(x) = 0.048. Score improved.
+Tracked -> [(100, 0.05), (99, 0.0495), (97, 0.048)].
+Step -> Step * 2 = 4.
+3. current_x -> current_x + direction * step = 93.
+ecc(x) = 0.04. Score improved.
+Tracked -> [(99, 0.0495), (97, 0.048), (93, 0.04)].
+Step -> Step * 2 = 8.
+4. current_x -> current_x + direction * step = 85.
+ecc(x) = 0.03. Score improved.
+Tracked -> [(97, 0.048), (93, 0.04), (85, 0.03)].
+Step -> Step * 2 = 16.
+5. current_x -> current_x + direction * step = 69.
+ecc(x) = 0.01. Score improved.
+Tracked -> [(93, 0.04), (85, 0.03), (69, 0.01)].
+Step -> Step * 2 = 32.
+6. current_x -> current_x + direction * step = 37.
+ecc(x) = 0.012. Score became worse.
+Tracked -> [(85, 0.03), (69, 0.01), (37, 0.012)].
+Stopping further interval search.
+Now we know that the minimal score is at x between 37 and 85 and use GS on that segment.
+
+
+if fc < fa and fc < fd {
+  relabel D as B, C as D
+}
+
+else if fd < fc and fd < fb {
+    relabel C as A, D as C
+}
+
+if fc <= fd {
+<relabel D to B, C to D>
+}
+
+else {
+<relabel C to A, D to C>
+}
+
+/////////////
+/////////////  NEW
+/////////////
+
+Function BoundryGetter {
+  parameter Nodelist.   // (time:seconds + 30, 0, 0, 10)
+  parameter IndexNeeded. // 3
+  parameter ScoreSystem.
+  parameter ScoreList.// parameters for score function ie. apoapsis height
+  parameter StepDirection is (-1).
+  parameter StepSize is 0.1.
+
+  local CurrentX is Nodelist[IndexNeeded].  // 10
+  local CurrentScore is ScoreSystem(Nodelist, ScoreList). // ie. 0.004
+  local XandScore is list(CurrentX, CurrentScore). // (10, 0.004)
+
+  local ScoreList is list(XandScore). // (10, 0.004)
+  local CurrentData is 0.
+  local OrginialStepSize is StepSize.
+
+  // until scorelist has three entries keep adding them to the list
+  until ScoreList:length = 3 {
+    set CurrentData to ScoreList[ScoreList:length -1]. // (10, 0.004)
+    set CurrentX to CurrentData[0]. // 10
+    set CurrentX to CurrentX + StepDirection * StepSize. // 99.9
+    set StepSize to StepSize * 2. // 0.2
+
+    local NewNodeList is list().
+    for item in NodeList {
+      NewNodeList:add(item).
+    }
+    NewNodeList:remove(IndexNeeded). // (time:seconds + 30, 0, 0)
+    NewNodeList:insert(IndexNeeded, CurrentX). // (time:seconds + 30, 0, 0, 99.9)
+    local DataList is list().
+    set NewScore to ScoreSystem(NewNodeList, ScoreList).
+    DataList:add(CurrentX).
+    DataList:add(NewScore).
+    ScoreList:add(DataList).
+  }
+
+  local BreakAttempt is 0.
+  until ScoreList[1][1] <= ScoreList[0][1] and ScoreList[1][1] <= ScoreList[2][1] {
+    local TempList is list().
+    for ListData in ScoreList {
+      TempList:add(ListData).
+    }
+    TempList:remove(0). // removed oldest entry
+
+    local OldScoreList is list(). // makes a list of the old scorelist to compare with the new scorelist
+    for ListData in ScoreList {
+      OldScoreList:add(ListData).
+    }
+
+    set CurrentData to TempList[1]. // newest entry (only two entries because the oldest got deleted)
+    set CurrentX to CurrentData[0]. // x value of newest entry
+    set CurrentX to CurrentX + StepDirection * StepSize.
+    set StepSize to StepSize * 2.
+
+    local NewNodeList is list().
+    for item in NodeList {
+      NewNodeList:add(item).
+    }
+    NewNodeList:remove(IndexNeeded). // (time:seconds + 30, 0, 0)
+    NewNodeList:insert(IndexNeeded, CurrentX).
+    local DataList is list().
+    set NewScore to ScoreSystem(NewNodeList, ScoreList).
+    DataList:add(CurrentX).
+    DataList:add(NewScore).
+    TempList:add(DataList).
+    set ScoreList to TempList.
+
+    if (ScoreList[0][1] > OldScoreList[0][1] and ScoreList[1][1] > OldScoreList[1][1] and ScoreList[2][1] > OldScoreList[2][1]) or (ScoreList[0][1]=ScoreList[1][1]=ScoreList[2][1]) {
+      if BreakAttempt = 1 {
+        HUDTEXT("no improvement in either way breaking", 5, 2, 30, red, false).
+        break.
+      }
+      set BreakAttempt to 1.
+      HUDTEXT("no improvement made! switching sign and resetting StepSize.", 5, 2, 30, red, false).
+      print "no improvement made! switching sign and resetting StepSize.".
+      set StepDirection to StepDirection*-1.
+      set StepSize to OrginialStepSize/10.
+    }
+
+  }
+}
+
+Function MinGoldSection {
+  parameter NodeList.
+  parameter IndexNeeded.
+  parameter ScoreList.
+  parameter ScoreSystem.
+  parameter a. // lower boundry
+  parameter b. // upper boundry
+  parameter xtol. // stops when dx is this size
+  parameter ftol. // stops when dscore is this size
+
+  local golden is 2 / (1 + sqrt(5)).
+  local cgolden is 1 - golden.
+  local c is golden * a + cgolden * b.
+  local d is cgolden * a + golden * b.
+
+  // a---c--d---b
+  local fa is ScoreFunction(NodeList, IndexNeeded, ScoreList, ScoreSystem, a).
+  local fb is ScoreFunction(NodeList, IndexNeeded, ScoreList, ScoreSystem, b).
+  local fc is ScoreFunction(NodeList, IndexNeeded, ScoreList, ScoreSystem, c).
+  local fd is ScoreFunction(NodeList, IndexNeeded, ScoreList, ScoreSystem, d).
+
+  local dx is 0.
+  local df is 0.
+  local next is 0. // 1 if next update is C, 2 if D
+
+  if fc < fa and fc < fd {
+    set dx to d - a.
+    set df to min(abs(fd - fc), abs(fa - fc)).
+    // relabel D as B, C as D
+    set b to d.
+    set fb to fd.
+    set d to c.
+    set fd to fc.
+    set next to 1.
+  }
+  else {
+    set dx to b - c.
+    set df to min(abs(fc - fd), abs(fb - fd)).
+    // relabel C as A, D as C
+    set a to c.
+    set fa to fc.
+    set c to d.
+    set fc to fd.
+    set next to 2.
+  }
+
+  until abs(dx) < xtol or abs(df) < ftol {
+    if next = 1 {
+      set c to golden * a + cgolden * b.
+      set fc to ScoreFunction(NodeList, IndexNeeded, ScoreList, ScoreSystem, c).
+    }
+    else {
+      set d to cgolden * a + golden * b.
+      set fd to ScoreFunction(NodeList, IndexNeeded, ScoreList, ScoreSystem, d).
+    }
+    if fc < fa and fc < fd {
+      set dx to d - a.
+      set df to min(abs(fd - fc), abs(fa - fc)).
+      // relabel D as B, C as D
+      set b to d.
+      set fb to fd.
+      set d to c.
+      set fd to fc.
+      set next to 1.
+    }
+    else {
+      set dx to b - c.
+      set df to min(abs(fc - fd), abs(fb - fd)).
+      // relabel C as A, D as C
+      set a to c.
+      set fa to fc.
+      set c to d.
+      set fc to fd.
+      set next to 2.
+    }
+  }
+  // return the argument of the minimal value found so far
+  if next = 1 { return d. }
+  else { return c. }
+}
+
+Function ScoreFunction {
+  parameter NodeList.
+  parameter IndexNeeded.
+  parameter ScoreList.
+  parameter ScoreSystem.
+  parameter Value.
+
+  local NewNodeList is list().
+  for item in NodeList {
+    NewNodeList:add(item).
+  }
+  NewNodeList:remove(IndexNeeded). // (time:seconds + 30, 0, 0)
+  NewNodeList:insert(IndexNeeded, Value).
+  set NewScore to ScoreSystem(NewNodeList, ScoreList).
+  return NewScore.
+}
+
+Function GoldenSearch {
+  parameter Nodelist.   // (time:seconds + 30, 0, 0, 10)
+  parameter IndexNeeded. // 3
+  parameter ScoreList.// parameters for score function ie. apoapsis height
+  parameter ScoreSystem. //@Squared or similar
+  parameter StepDirection is (-1).
+  parameter StepSize is 0.1.
+  parameter xtol is 1e-10.
+  parameter ftol is 1e-10.
+
+  local DecentScoreList is BoundryFinder(NodeList, IndexNeeded, ScoreSystem, ScoreList, StepDirection, StepSize).
+  local GoodValue is MinGoldSection(NodeList, IndexNeeded, ScoreList, ScoreSystem, DecentScoreList[0][0], DecentScoreList[2][0], xtol, ftol).
+  return GoodValue.
+}
+
+
+/////////////
+/////////////   OLD
+/////////////
+
+global TX_lib_hillclimb_main is lexicon(
+  "BoundryFinder", BoundryFinder@,
+  "MinGoldSection", MinGoldSection@,
+  "GoldenSearch", GoldenSearch@,
+  "Squared", Squared@
+).
+local TXStopper is "[]".
+
+Function BoundryFinder {
+  parameter Data.
+  parameter ScoreSystem.
+  parameter StepDirection is (-1).
+  parameter StepSize is 0.1.
+
+  clearscreen.
+
+  local ScoreList is list().
+  local DataList is list().
+  ScoreList:add(Data).
+
+
+  local CurrentData is 0.
+  local CurrentX is 0.
+  local NewScore is 0.
+
+  until ScoreList:length = 3 {
+    set CurrentData to ScoreList[ScoreList:length -1]. //newest entry
+    set CurrentX to CurrentData[0].
+    set CurrentX to CurrentX + StepDirection * StepSize.
+    set StepSize to StepSize * 2.
+
+    local DataList is list().
+    set NewScore to ScoreSystem(CurrentX).
+    DataList:add(CurrentX).
+    DataList:add(NewScore).
+    ScoreList:add(DataList).
+
+    // newest entry's x
+    // x + direction * step
+    // step = step *2
+  }
+
+  // when is the middle score the best
+  local PrintCounter is 0.
+  local BreakAttempt is 0.
+  until ScoreList[1][1] <= ScoreList[0][1] and ScoreList[1][1] <= ScoreList[2][1] {
+    local TempList is list().
+    for ListData in ScoreList {
+      TempList:add(ListData).
+    }
+    TempList:remove(0). // removed oldest entry
+
+    local OldScoreList is list(). // makes a list of the old scorelist to compare with the new scorelist
+    for ListData in ScoreList {
+      OldScoreList:add(ListData).
+    }
+
+    set CurrentData to TempList[1]. // newest entry
+    set CurrentX to CurrentData[0]. // x value of newest entry
+    set CurrentX to CurrentX + StepDirection * StepSize.
+    set StepSize to StepSize * 2.
+
+    local DataList is list().
+    set NewScore to ScoreSystem(CurrentX).
+    DataList:add(CurrentX).
+    DataList:add(NewScore).
+    TempList:add(DataList).
+    set ScoreList to TempList.
+
+    //set PrintCounter to PrintCounter + 1.
+    if PrintCounter = 5 {
+      print "0: new old".
+      print ScoreList[0][1].
+      print OldScoreList[0][1].
+      print "1: new old".
+      print ScoreList[1][1].
+      print OldScoreList[1][1].
+      print "2: new old".
+      print ScoreList[2][1].
+      print OldScoreList[2][1].
+      set PrintCounter to 0.
+      wait 3.
+    }
+
+    if (ScoreList[0][1] > OldScoreList[0][1] and ScoreList[1][1] > OldScoreList[1][1] and ScoreList[2][1] > OldScoreList[2][1]) or (ScoreList[0][1]=ScoreList[1][1]=ScoreList[2][1]) {
+      if BreakAttempt = 1 {
+        HUDTEXT("no improvement in either way breaking", 5, 2, 30, red, false).
+        break.
+      }
+      set BreakAttempt to 1.
+      HUDTEXT("no improvement made! switching sign and resetting StepSize.", 5, 2, 30, red, false).
+      print "no improvement made! switching sign and resetting StepSize.".
+      set StepDirection to StepDirection*-1.
+      set StepSize to OrginialStepSize/10.
+      set OrginialStepSize to StepSize.
+    }
+
+  }
+
+  print "found best decent guess".
+  return ScoreList.
+
+}
+
+Function MinGoldSection {
+  parameter fn. // scoring function
+  parameter a. // lower boundry
+  parameter b. // upper boundry
+  parameter xtol. // stops when dx is this size
+  parameter ftol. // stops when dscore is this size
+
+  local golden is 2 / (1 + sqrt(5)).
+  local cgolden is 1 - golden.
+  local c is golden * a + cgolden * b.
+  local d is cgolden * a + golden * b.
+
+  // a---c--d---b
+  local fa is fn(a).
+  local fb is fn(b).
+  local fc is fn(c).
+  local fd is fn(d).
+  local dx is 0.
+  local df is 0.
+  local next is 0. // 1 if next update is C, 2 if D
+
+  if fc < fa and fc < fd {
+    set dx to d - a.
+    set df to min(abs(fd - fc), abs(fa - fc)).
+    // relabel D as B, C as D
+    set b to d.
+    set fb to fd.
+    set d to c.
+    set fd to fc.
+    set next to 1.
+  }
+  else {
+    set dx to b - c.
+    set df to min(abs(fc - fd), abs(fb - fd)).
+    // relabel C as A, D as C
+    set a to c.
+    set fa to fc.
+    set c to d.
+    set fc to fd.
+    set next to 2.
+  }
+
+  until abs(dx) < xtol or abs(df) < ftol {
+    if next = 1 {
+      set c to golden * a + cgolden * b.
+      set fc to fn(c).
+    }
+    else {
+      set d to cgolden * a + golden * b.
+      set fd to fn(d).
+    }
+    if fc < fa and fc < fd {
+      set dx to d - a.
+      set df to min(abs(fd - fc), abs(fa - fc)).
+      // relabel D as B, C as D
+      set b to d.
+      set fb to fd.
+      set d to c.
+      set fd to fc.
+      set next to 1.
+    }
+    else {
+      set dx to b - c.
+      set df to min(abs(fc - fd), abs(fb - fd)).
+      // relabel C as A, D as C
+      set a to c.
+      set fa to fc.
+      set c to d.
+      set fc to fd.
+      set next to 2.
+    }
+  }
+  // return the argument of the minimal value found so far
+  if next = 1 { return d. }
+  else { return c. }
+}
+
+Function GoldenSearch {
+  parameter Data.
+  parameter ScoreSystem.
+  parameter StepDirection is (-1).
+  parameter StepSize is 0.001.
+  parameter xtol is 1e-10.
+  parameter ftol is 1e-10.
+
+  local DecentScoreList is BoundryFinder(Data, ScoreSystem, StepDirection, StepSize).
+  local GoodValue is MinGoldSection(ScoreSystem, DecentScoreList[0][0], DecentScoreList[2][0], xtol, ftol).
+  return GoodValue.
+}
+
+// test function, can be any scoring function that favors a low score
+Function Squared {
+  parameter input.
+  return sqrt(abs(input)).
+}
+
+//
+
+Function Score {
+  Parameter NodeList.
+  Parameter ScoreType.
+  Parameter ScoreList.
+  Parameter DeltaVCap.
+
+  local ScoreManeuver is node(NodeList[0], NodeList[1], NodeList[2], NodeList[3]).
+  add   ScoreManeuver.
+  wait until hasnode = true.
+  local Result is 20^63.
+  local ScoreTypesAvailable is list("Circularize", "Inclination", "Apoapsis", "Periapsis", "ApoapsisMatch", "PerApoMatch", "PerPerMatch", "MoonTransfer", "Interplanetary", "FinalCorrection", "Error").
+  local i is 0.
+  local Override is false.
+
+  until Result <> 20^63 or Override = true {
+    set Result to ScoreExecuter(ScoreType, ScoreTypesAvailable[i], ScoreList).
+    set i to i + 1.
+    if ScoreTypesAvailable[i] = "Error" {
+      set Override to true.
+    }
+  }
+
+
+
+  if ScoreManeuver:deltav:mag > DeltaVCap {
+    set Result to 2^64.
+    print "surpased delta v cap              " at (1, 26).
+  }
+
+  if ScoreManeuver:eta < 0 {
+    set Result to -1*((2^64)/ScoreManeuver:eta).
+    print "eta too close                     " at (1, 26).
+    local TimeCopy is BestCandidate[0].
+    BestCandidate:remove(0).
+    if time:seconds < TimeCopy {
+      BestCandidate:insert(0, TimeCopy+30).
+    } else {
+      BestCandidate:insert(0, time:seconds+30).
+    }
+
+  }
+
+  // if sub_orbital dont penalize below atmosphere
+  if ship:status <> "sub_orbital" {
+    if ship:body:atm:exists = true {
+      if ScoreManeuver:orbit:periapsis < ship:body:atm:height {
+        set Result to 2^64.
+        print "periapsis under atm            " at(1,26).
+      }
+    }
+
+    if ScoreManeuver:orbit:periapsis < 10000 {
+      set Result to 2^64.
+      print "periapsis too low (highest point of planet is >0 m)     " at(1,26).
+    }
+
+    if Result < 0 {
+      set Result to 2^64.
+      print "result under 0                            " at(1,26).
+    }
+  }
+
+  remove ScoreManeuver.
+  return Result.
+}
+
+Function Improve {
+  parameter NodeList.     // (time:seconds + 30, 0, 0, 23)
+  parameter ScoreList.    // (kerbin, kerbin)
+  parameter ScoreType.    // circularization
+  parameter Restriction.  // "realnormal_prograde"
+
+  // give nodelist ie. (time:seconds + eta:apoapsis, 0, 0, 10)
+  // edit per entry
+  local RestrictionTypes is list(
+    "timeplus", "timemin", "radialin", "radialout", "realnormal", "antinormal", "prograde", "retrograde"
+  ).
+
+  local NonRestrictedList is list().
+  local RestrictionStepper is 0.
+
+  until RestrictionStepper = 7 {
+
+    if not Restriction:contains(RestrictionTypes[RestrictionStepper]) {
+      NonRestrictedList:add(RestrictionTypes[RestrictionStepper]).
+    }
+    set RestrictionStepper to RestrictionStepper + 1.
+  }
+  // all wanted variables are now in NonRestrictedList
+
+
+}

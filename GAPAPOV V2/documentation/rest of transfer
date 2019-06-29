@@ -1,0 +1,65 @@
+maybe local minimums when trying to improve closest approach
+
+////////////////////////////////////////////////////////////////////////////////
+
+Function MoonTransfer {
+  Parameter TargetDestination.
+  Parameter TargetPeriapsis.
+  Parameter TargetInclination.
+
+
+  //TX_lib_transfer_burn["MoonPostEncounterBurn"](TargetPeriapsis, TargetInclination).
+  print "POST INCL CORRECTION".
+
+  if eta:periapsis > 30 {
+    local NewList is list(time:seconds + eta:periapsis, 0, 0, 0).
+    local NewScoreList is list(TargetDestination).
+    local NewRestrictionList is TX_lib_hillclimb_universal["IndexFiveFolderder"]("realnormal_antinormal").
+    local FinalMan is TX_lib_hillclimb_universal["ResultFinder"](NewList, "Circularize", NewScoreList, NewRestrictionList).
+    TX_lib_hillclimb_man_exe["ExecuteManeuver"](FinalMan).
+
+    print "checking eccentricity".
+    until ship:orbit:eccentricity <= 1 {
+      local DvNeededForCirc is TX_lib_other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
+      local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
+      TX_lib_hillclimb_man_exe["ExecuteManeuver"](CircList).
+    }
+
+  } else {
+    print "periapsis too close emergency burn".
+    until ship:orbit:eccentricity <= 1 {
+      local DvNeededForCirc is TX_lib_other["VisViva"](ship:altitude, ship:altitude+ship:body:radius).
+      local CircList is list(time:seconds, 0, 0, DvNeededForCirc).
+      TX_lib_hillclimb_man_exe["ExecuteManeuver"](CircList).
+    }
+  }
+
+  // we have circularized by now so nows the time to match periapsis and apoapsis to the target
+  // but first match inclination
+
+  TX_lib_transfer_burn["InclinationMatcher2"](TargetInclination).
+
+  print "matching per and apo".
+  local DvNeededForTar is TX_lib_other["VisViva"](ship:orbit:apoapsis, (ship:orbit:apoapsis + TargetPeriapsis)/2 + ship:body:radius).
+  local TarList is list(time:seconds + eta:apoapsis, 0, 0, DvNeededForTar).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](TarList).
+
+  // check if we need to go to apo or per to circularize
+
+  local ManVal1 is abs(TargetPeriapsis-ship:orbit:periapsis).
+  local ManVal2 is abs(TargetPeriapsis-ship:orbit:apoapsis).
+  local ApoOrPerHeight is "x".
+  local ApoOrPerETA is "x".
+
+  if ManVal1 < ManVal2 {
+    set ApoOrPerHeight to ship:orbit:periapsis.
+    set ApoOrPerETA to eta:periapsis.
+  } else {
+    set ApoOrPerHeight to ship:orbit:apoapsis.
+    set ApoOrPerETA to eta:apoapsis.
+  }
+
+  local DvNeededForCirc is TX_lib_other["VisViva"](ApoOrPerHeight, ApoOrPerHeight+ship:body:radius).
+  local CircList is list(time:seconds + ApoOrPerETA, 0, 0, DvNeededForCirc).
+  TX_lib_hillclimb_man_exe["ExecuteManeuver"](CircList).
+}

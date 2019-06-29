@@ -1,0 +1,11 @@
+When making a lib or exe file use the TX_ prefix so the Dependencies script can pick it up
+after the lexicon add brackets, here is an example:
+
+global TX_lib_hillclimb_score is lexicon(
+  "CircScore", CircScore@,
+  "ApoapsisScore", ApoapsisScore@,
+  "InclinationScore", InclinationScore@
+).
+local TXStopper is "[]".
+
+The part of the lexicon after TX_ should be the same as the file name
